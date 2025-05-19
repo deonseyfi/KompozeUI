@@ -1,3 +1,5 @@
+import Dashboard from "../ProfilePage/Page/Dashboard";
+
 export default function Analytics() {
-  return <div style={{ color: 'white' }}>Analytics Page</div>;
+  return <Dashboard />; // Use the Dashboard component here
 }
