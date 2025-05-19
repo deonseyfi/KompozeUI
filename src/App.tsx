@@ -1,25 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ResponsiveAppBar from "./AppBar";
+import Discover from "./pages/Discover"; // NEW: you'll move StickyHeadTable here
+import Analytics from "./pages/Analytics"; // stub file
+import About from "./pages/About"; // stub file
+import APIPlatform from "./pages/APIPlatform"; // stub file
+import "./App.css";
+
+const theme = createTheme({
+  typography: {
+    fontFamily: `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
+  },
+});
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ThemeProvider theme={theme}>
+      <Router>
+        <ResponsiveAppBar />
+        <div style={{ padding: "24px" }}>
+          <Routes>
+            <Route path="/" element={<Discover />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/api-platform" element={<APIPlatform />} />
+          </Routes>
+        </div>
+      </Router>
+    </ThemeProvider>
   );
 }
 
