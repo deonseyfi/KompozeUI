@@ -48,16 +48,23 @@ function ResponsiveAppBar() {
         <Toolbar disableGutters>
           {/* Desktop logo */}
           <Box
-            component="a"
-            href="/"
+            component={NavLink}
+            to="/landing"
             sx={{
               display: { xs: "none", md: "flex" },
               alignItems: "center",
               mr: 2,
               textDecoration: "none",
+              userSelect: "none",
+              cursor: "pointer",
             }}
           >
-            <Box component="img" src={WebLogo} alt="Logo" sx={{ height: 40 }} />
+            <Box
+              component="img"
+              src={WebLogo}
+              alt="Logo"
+              sx={{ height: 40, pointerEvents: "none" }}
+            />
           </Box>
 
           {/* Mobile menu icon */}
