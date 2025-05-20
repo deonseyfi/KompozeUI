@@ -31,6 +31,7 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
   }
 
   return (
+  <Paper sx={{ width: "100%", overflow: "hidden", backgroundColor: "#000", boxShadow: "none" }}>  
     <TableContainer component={Paper} sx={{ maxHeight: "70vh", mt: 2, backgroundColor: "#111", borderRadius: 5 }}>
       <Table size="small">
         <TableHead>
@@ -56,6 +57,7 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
         </TableBody>
       </Table>
     </TableContainer>
+  </Paper>
   );
 };
 
