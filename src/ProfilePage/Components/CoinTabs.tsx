@@ -21,8 +21,9 @@ const CoinTabs: React.FC<CoinTabsProps> = ({ coins, selected, onChange }) => {
       value={selectedIndex >= 0 ? selectedIndex : 0}
       onChange={(_, idx) => onChange(coins[idx].symbol)}
       textColor="primary"
-      indicatorColor="primary"
-      sx={{ minHeight: 36, backgroundColor : 'darkgrey' }}
+      sx={{ minHeight: 36, backgroundColor : 'black'  ,  '& .MuiTabs-indicator': {
+        display: 'none', // Remove the indicator color
+       } }}
     >
       {coins.map((c) => (
         <Tab
@@ -36,7 +37,8 @@ const CoinTabs: React.FC<CoinTabsProps> = ({ coins, selected, onChange }) => {
           }
           iconPosition="start"
           label={c.symbol.toUpperCase()}
-          sx={{ minWidth: 80, textTransform: 'none' }}
+          sx={{ minWidth: 80, textTransform: 'none' , color: 'white', fontWeight: 'bold', '&.active': { borderBottom: 'orange '}, '&.Mui-selected': { color: 'orange',           borderBottom: '2px solid orange', // Add bottom border for selected tab
+          }, '&:hover': { color: 'orange' }, '&.MuiTabs-indicator': { backgroundColor: 'orange' } }} // Add hover effect
         />
       ))}
     </Tabs>
