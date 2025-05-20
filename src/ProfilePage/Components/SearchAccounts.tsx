@@ -19,7 +19,21 @@ const SearchAccounts: React.FC<SearchAccountsProps> = ({ onSearch }) => (
         </InputAdornment>
       ),
     }}
-    sx={{ width: 200 }}
+    sx={{             input: { color: "white" },
+    "& .MuiOutlinedInput-root": {
+      "& fieldset": {
+        borderColor: "orange",
+      },
+      "&:hover fieldset": {
+        borderColor: "orange",
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: "orange",
+      },
+    },
+    backgroundColor: "#111",
+    borderRadius: 2,
+    width: 250}}
   />
 );
 

@@ -38,7 +38,7 @@ const Dashboard: React.FC = () => {
     const [searchTerm, setSearchTerm] = useState<string>('');
 
   return (
-    <Container maxWidth="lg" sx={{ py: 2, backgroundColor: 'darkgrey' }}>
+    <Container maxWidth="lg" sx={{ py: 2, backgroundColor: 'black' }}>
       <UserHeader
         username="@username"
         avgTimeframe="Short Term"
