@@ -1,0 +1,229 @@
+// import React, { useEffect, useRef } from 'react';
+// import './Landing.css';
+// import gsap from 'gsap';
+
+// import robotBase from '../assets/robotempty.png';
+// import glowEyes from '../assets/eyes.png';
+// import glowMouth from '../assets/mouth.png';
+// import glowChest from '../assets/chestlights.png';
+// import glowName from '../assets/namelight.png';
+
+
+// const Landing = () => {
+//   return (
+//     <div className="landing-page">
+//       <div className="overlay-text">
+//         <h1>
+//           <span className="kompoz-text">{'{Kompoz}'}</span> the chaos. <br />
+//           Follow the <span className="voices-text">voices</span> that move the markets.
+//         </h1>
+//         <p>
+//           We harness the power of AI to analyze crypto Twitter/X. <br />
+//           Our platform filters the noise, breaking down each post into actionable insights using NLP and price data correlation.
+//         </p>
+//       </div>
+
+//       <div className="robot-wrapper">
+//         <div className="robot-layers">
+//           <img src={robotBase} alt="Robot Base" className="robot-layer" />
+//           <img src={glowEyes} alt="Glow Eyes" className="glow-layer glow-eyes" />
+//           <img src={glowMouth} alt="Glow Mouth" className="glow-layer glow-mouth" />
+//           <img src={glowChest} alt="Glow Chest" className="glow-layer glow-chest" />
+//           <img src={glowName} alt="Glow Name" className="glow-layer glow-name" />
+//         </div>
+//       </div>
+
+//       {/* 👇 Add spotlight here */}
+//       <div className="spotlight-overlay"></div>
+//     </div>
+//   );
+// };
+
+// export default Landing;
+
+//CSS
+
+// /* Reset document height and spacing */
+// html, body, #root {
+//   margin: 0;
+//   padding: 0;
+//   height: 100%;
+// }
+
+// /* Full-screen landing layout */
+// .landing-page {
+//   min-height: 100vh;
+//   background: black;
+//   color: white;
+//   padding-bottom: 0px;
+//   text-align: center;
+//   position: relative;
+// }
+
+// /* TOP-LEFT SPOTLIGHT EFFECT */
+// .spotlight-overlay {
+//   position: fixed;
+//   top: 0;
+//   left: 0;
+//   width: 600px;
+//   height: 600px;
+//   background: radial-gradient(
+//     circle at top left,
+//     rgba(255, 136, 0, 0.5) 0%,
+//     rgb(255, 94, 0) 0%,
+//     rgba(0, 0, 0, 0.8) 70%,
+//     transparent 100%
+//   );
+//   pointer-events: none;
+//   z-index: 0;
+//   filter: blur(100px);
+//   mix-blend-mode: screen;
+
+//   /* ✨ Flicker effect added here */
+//   opacity: 0;
+//   animation: spotlightFlicker 2.5s ease-out forwards;
+// }
+// /* Main text block */
+// .overlay-text {
+//   padding-top: 4rem;
+//   z-index: 2;
+//   position: relative;
+//   max-width: 800px;
+//   margin: 0 auto;
+// }
+
+// /* Highlighted span styles */
+// .kompoz-text,
+// .voices-text {
+//   color: #ff6600;
+// }
+
+// /* === Robot Section === */
+
+// /* Container fixed at bottom */
+// .robot-wrapper {
+//   position: fixed;
+//   bottom: 0;
+//   left: 50%;
+//   transform: translateX(-50%);
+//   z-index: 1;
+//   pointer-events: none;
+//   height: 250px; /* Lock in final size */
+// }
+
+// /* Inner layer stack container */
+// .robot-layers {
+//   position: relative;
+//   height: 250px;
+//   width: auto;
+// }
+
+// /* Base robot image */
+// .robot-layer {
+//   height: 250px;
+//   width: auto;
+//   display: block;
+// }
+
+// /* Overlay glow layers */
+// .glow-layer {
+//   position: absolute;
+//   top: 0;
+//   left: 0;
+//   height: 250px;
+//   width: auto;
+//   opacity: 0;
+//   pointer-events: none;
+// }
+
+// /* === Glow Animations === */
+// .glow-eyes {
+//   animation: eyesOn 3s ease-in-out 0.2s forwards infinite alternate;
+// }
+// .glow-mouth {
+//   animation: mouthTalk 0.2s steps(2, start) infinite;
+//   opacity: 1 !important; /* Always visible while talking */
+//   filter: brightness(3) blur(2px) drop-shadow(0 0 8px rgba(255, 100, 0, 0.7));
+// }
+// .glow-name {
+//   animation: nameOn 0.8s ease-in-out 1.8s forwards infinite alternate;
+// }
+// .glow-chest {
+//   animation: chestPulse 2s ease-in-out 2.5s infinite alternate;
+// }
+
+// /* === Keyframes === */
+// @keyframes eyesOn {
+//   to {
+//     opacity: 1;
+//     filter: brightness(5) blur(2px);
+//   }
+// }
+// @keyframes mouthTalk {
+//   0% {
+//     transform: scaleY(1);
+//   }
+//   50% {
+//     transform: scaleY(0.7); /* Shrink mouth vertically like it's closing */
+//   }
+//   100% {
+//     transform: scaleY(1);
+//   }
+// }
+// @keyframes nameOn {
+//   0% {
+//     opacity: 0;
+//     filter: brightness(0.5);
+//   }
+//   50% {
+//     opacity: 1;
+//     filter: brightness(2);
+//   }
+//   100% {
+//     opacity: 0.8;
+//     filter: brightness(1.2);
+//   }
+// }
+// @keyframes chestPulse {
+//   0% {
+//     opacity: 0.4;
+//     filter: brightness(1) blur(0px);
+//   }
+//   100% {
+//     opacity: 1;
+//     filter: brightness(2) blur(0px);
+//   }
+  
+// }
+// @keyframes spotlightFlicker {
+//   0% {
+//     opacity: 0;
+//   }
+//   20% {
+//     opacity: 0.3;
+//   }
+//   30% {
+//     opacity: 0;
+//   }
+//   40% {
+//     opacity: 0.5;
+//   }
+//   50% {
+//     opacity: 0;
+//   }
+//   60% {
+//     opacity: 0.7;
+//   }
+//   70% {
+//     opacity: 0.1;
+//   }
+//   80% {
+//     opacity: 0.5;
+//   }
+//   90% {
+//     opacity: 0.2;
+//   }
+//   100% {
+//     opacity: 1;
+//   }
+// } 
