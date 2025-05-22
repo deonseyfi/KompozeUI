@@ -18,6 +18,7 @@
     "@types/node": "^16.18.126",
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
+    "cryptocurrency-icons": "^0.18.1",
     "gsap": "^3.13.0",
     "lightweight-charts": "^5.0.7",
     "react": "^19.1.0",
