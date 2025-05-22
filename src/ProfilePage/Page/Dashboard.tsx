@@ -5,6 +5,8 @@ import CoinTabs, {Coin} from '../Components/CoinTabs';
 import SearchAccounts from '../Components/SearchAccounts';
 import TradingChart from '../Components/TradingChart';
 import TweetTable, {TweetRecord} from '../Components/TweetTable';
+import { getCoinIcon } from '../Components/Icons';
+import { get } from 'http';
 
 const sampleTweets: TweetRecord[] = [
     {
@@ -22,15 +24,17 @@ const sampleTweets: TweetRecord[] = [
     // …more rows
   ];
 
+// Create data with imageURL pointing to cryptocurrency-icons package 
+
+
 
 const COINS: Coin[] = [
-    { symbol: 'BTC', imageUrl: '/icons/btc.png' },
-    { symbol: 'ETH', imageUrl: '/icons/eth.png' },
-    { symbol: 'XRP', imageUrl: '/icons/xrp.png' },
-    { symbol: 'SOL', imageUrl: '/icons/sol.png' },
-    { symbol: 'DOGE', imageUrl: '/icons/doge.png' },
-    { symbol: 'LINK', imageUrl: '/icons/link.png' },
-    { symbol: 'TAD', imageUrl: '/icons/tad.png' },
+    { symbol: 'BTC', imageUrl: getCoinIcon('btc') },
+    { symbol: 'ETH', imageUrl: getCoinIcon('eth') },
+    { symbol: 'XRP', imageUrl: getCoinIcon('xrp') },
+    { symbol: 'SOL', imageUrl: getCoinIcon('sol') },
+    { symbol: 'DOGE', imageUrl: getCoinIcon('doge') },
+    { symbol: 'LINK', imageUrl: getCoinIcon('link') },
   ];
 
 const Dashboard: React.FC = () => {
