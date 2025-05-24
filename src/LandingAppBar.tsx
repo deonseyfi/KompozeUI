@@ -22,7 +22,7 @@ const pages = [
   { label: "API Platform", path: "/api-platform" },
 ];
 
-function ResponsiveAppBar() {
+function LandingAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
@@ -37,13 +37,14 @@ function ResponsiveAppBar() {
 
   return (
     <AppBar
-      position="static"
+      position="absolute"
       sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid white",
-        borderTop: "1px solid white",
+        backgroundColor: "transparent",
+        borderBottom: "none",
+        borderTop: "none",
         boxShadow: "none",
-        marginTop: "35px",
+        marginTop: "0px",
+        zIndex: 10,
       }}
     >
       <Container 
@@ -220,4 +221,4 @@ function ResponsiveAppBar() {
   );
 }
 
-export default ResponsiveAppBar;
+export default LandingAppBar;

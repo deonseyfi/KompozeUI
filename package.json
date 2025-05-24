@@ -1,5 +1,6 @@
 {
   "name": "my-app",
+  "proxy": "https://pro-api.coinmarketcap.com",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -51,7 +52,9 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
+  }
+  
+  ,
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
     "@types/babel__generator": "^7.27.0",
@@ -65,5 +68,6 @@
     "@types/stack-utils": "^2.0.3",
     "@types/yargs": "^17.0.33",
     "@types/yargs-parser": "^21.0.3"
+    
   }
 }

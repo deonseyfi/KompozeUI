@@ -20,24 +20,43 @@ html, body, #root {
 
 /* Text block */
 .overlay-text {
+  font-size: 1.3rem;
   padding-top: 4rem;
   padding-bottom: 4rem;
-  max-width: 800px;
-  margin: 0 auto;
+  max-width: 500px; /* Reduced width for right side positioning */
+  margin: 0; /* Remove auto centering */
+  position: absolute; /* Changed from relative */
+  right: 20rem; /* Position from right edge */
+  top: 50%; /* Vertically center */
+  transform: translateY(-50%); /* Adjust for true vertical centering */
   z-index: 2;
-  position: relative;
   box-sizing: border-box;
   color: white;
-  text-align: center;
+  text-align: left; /* Changed from center to left */
   opacity: 0;
-  animation: fadeIn 2s ease-in-out 5s forwards;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .overlay-text {
+    right: 1rem;
+    max-width: 300px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+@media (max-width: 480px) {
+  .overlay-text {
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+    width: calc(100% - 2rem);
+    position: relative;
+    top: auto;
+    transform: none;
+    margin-top: 2rem;
+  }
 }
-
 .kompoz-text,
 .voices-text {
   color: #ff6600;
@@ -71,23 +90,28 @@ html, body, #root {
   bottom: 0;
   left: 50%;
   transform: translateX(-50%);
-  height: 400px;
+  /* Use clamp for responsive height - min: 200px, preferred: 40vh, max: 400px */
+  height: clamp(200px, 40vh, 400px);
   pointer-events: none;
   z-index: 1;
-  visibility: hidden; /* Initially hidden, will be controlled by GSAP */
-  text-align: center; /* Help with centering */
+  visibility: visible;
+  opacity: 0;
+  text-align: center;
+  transition: none;
 }
 
 .robot-layers {
   position: relative;
-  height: 400px;
-  display: inline-block; /* Critical for centering */
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
+  display: inline-block;
 }
 
-/* Base robot image */
+/* Base robot image - responsive */
 .robot-layer {
   position: relative;
-  height: 400px;
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
   width: auto;
   display: block;
 }
@@ -97,58 +121,72 @@ html, body, #root {
   position: absolute;
   top: 0;
   left: 0;
-  height: 400px;
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
   width: auto; 
   opacity: 0;
   pointer-events: none;
 }
 
-/* Filter effects for each glow layer */
-.glow-eyes {
-  filter: brightness(5) blur(4px);
-  z-index: 5;
-}
-
-.glow-mouth {
-  filter: brightness(10) blur(3px);
-  z-index: 4;
-}
-
-.glow-name {
-  filter: brightness(4) blur(3px);
-  z-index: 3;
-}
-
-.glow-chest {
-  filter: brightness(4) blur(3px);
-  z-index: 2;
-}
-
-/* Light beam from eyes */
+/* Light beam from eyes - responsive */
 .robot-wrapper::before {
   content: '';
   position: absolute;
-  top: 80px;
+  /* Scale top position with robot size */
+  top: calc(clamp(200px, 40vh, 400px) * 0.2); /* 20% from top */
   left: 50%;
   transform: translateX(-50%);
-  width: 150px;
-  height: 250px;
+  /* Scale beam dimensions */
+  width: calc(clamp(200px, 40vh, 400px) * 0.375); /* 37.5% of robot height */
+  height: calc(clamp(200px, 40vh, 400px) * 0.625); /* 62.5% of robot height */
   background: radial-gradient(
     ellipse at top,
     rgba(255, 166, 0, 0.4) 0%,
     rgba(255, 166, 0, 0.2) 30%,
     transparent 70%
   );
-  filter: blur(12px);
+  /* Scale blur with size */
+  filter: blur(clamp(6px, 1.2vh, 12px));
   opacity: 0;
   animation: beamFadeIn 2s ease-in-out 9s forwards;
 }
 
-@keyframes beamFadeIn {
-  from { opacity: 0; }
-  to { opacity: 0.8; }
+/* Floor glow beneath robot - responsive */
+.robot-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Scale floor glow */
+  width: calc(clamp(200px, 40vh, 400px) * 0.5); /* 50% of robot height */
+  height: calc(clamp(200px, 40vh, 400px) * 0.05); /* 5% of robot height */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 102, 0, 0.6) 0%,
+    rgba(255, 102, 0, 0.1) 70%,
+    transparent 100%
+  );
+  /* Scale blur */
+  filter: blur(clamp(4px, 0.8vh, 8px));
+  opacity: 0;
+  animation: floorGlowFadeIn 2s ease-in-out 9s forwards;
 }
 
+/* Responsive glow filter adjustments */
+@media (max-width: 768px) {
+  .glow-eyes {
+    filter: brightness(3) blur(0px); /* Reduced brightness for smaller screens */
+  }
+  
+  .glow-chest {
+    filter: brightness(2.5); /* Reduced brightness */
+  }
+  
+  .glow-name {
+    filter: brightness(15); /* Reduced brightness */
+  }
+}
 /* Floor glow beneath robot */
 .robot-wrapper::after {
   content: '';
