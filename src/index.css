@@ -6,7 +6,8 @@
 }
 
 html, body, #root {
-  background-color: #000;
+  /* background: radial-gradient(ellipse at bottom center, rgba(255, 119, 0, 0.85) 10%, rgba(220, 33, 33, 0.95) 30%, black 100%); */
+  background: rgb(0, 0, 0);
   color: white;
   height: 100%;
   width: 100%;

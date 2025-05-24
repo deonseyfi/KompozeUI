@@ -1,13 +1,16 @@
-import React from "react";
-import ResponsiveAppBar from "../AppBar"; // make sure this path is correct
-import "../pages/Landing.css"; // scoped landing page styles
+import React from 'react';
+import LandingAppBar from '../LandingAppBar';
 
-const LandingLayout = ({ children }: { children: React.ReactNode }) => {
+interface LandingLayoutProps {
+  children: React.ReactNode;
+}
+
+const LandingLayout: React.FC<LandingLayoutProps> = ({ children }) => {
   return (
-    <div className="landing-page">
-      <ResponsiveAppBar />
+    <>
+      <LandingAppBar />
       {children}
-    </div>
+    </>
   );
 };
 
