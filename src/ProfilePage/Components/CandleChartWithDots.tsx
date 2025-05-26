@@ -15,6 +15,8 @@ interface CandleChartWithDotsProps {
     textColor?: string;
     areaTopColor?: string;
     areaBottomColor?: string;
+    candleStickData: any;
+    tweets: any;
   };
 }
 
@@ -27,6 +29,7 @@ const CandleChartWithDots: React.FC<CandleChartWithDotsProps> = ({
     textColor = '#e0e0e0',
     areaTopColor = '#2962FF',
     areaBottomColor = 'rgba(41, 98, 255, 0.28)',
+    
   } = colors;
 
   const chartContainerRef: RefObject<HTMLDivElement | null> = useRef<HTMLDivElement | null>(null);
