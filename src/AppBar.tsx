@@ -13,19 +13,26 @@ import Button from "@mui/material/Button";
 import AdbIcon from "@mui/icons-material/Adb";
 import StarIcon from "@mui/icons-material/Star";
 import PersonIcon from "@mui/icons-material/Person";
-import WebLogo from "./weblogo6.png"; // adjust path if needed
+import WebLogo from "./weblogo6.png";
+import OAuthSignInPage from "./OAuthSignInPage";
+import ClickAwayListener from "@mui/material/ClickAwayListener";
+import { useWatchlist } from "./DiscoverPage/WatchlistFunctionality";
 
 const pages = [
   { label: "Discover", path: "/" },
   { label: "Analytics", path: "/analytics" },
   { label: "About Us", path: "/about" },
-  { label: "API Platform", path: "/api-platform" },
 ];
 
 function ResponsiveAppBar() {
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(
     null
   );
+  const [loginOpen, setLoginOpen] = React.useState(false);
+
+  // Move the useWatchlist hook INSIDE the component
+  const { toggleWatchlistView, hasWatchlistItems, isWatchlistView } =
+    useWatchlist();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -35,169 +42,200 @@ function ResponsiveAppBar() {
     setAnchorElNav(null);
   };
 
-  return (
-    <AppBar
-      position="static"
-      sx={{
-        backgroundColor: "black",
-        borderBottom: "1px solid white",
-        boxShadow: "none",
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          {/* Desktop logo */}
-          <Box
-            component={NavLink}
-            to="/landing"
-            sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              mr: 2,
-              textDecoration: "none",
-              userSelect: "none",
-              cursor: "pointer",
-            }}
-          >
-            <Box
-              component="img"
-              src={WebLogo}
-              alt="Logo"
-              sx={{ height: 40, pointerEvents: "none" }}
-            />
-          </Box>
+  const handleLoginClick = () => {
+    setLoginOpen(true);
+  };
 
-          {/* Mobile menu icon */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <IconButton
-              size="large"
-              aria-label="open navigation menu"
-              onClick={handleOpenNavMenu}
-              color="inherit"
+  const handleLoginClose = () => {
+    setLoginOpen(false);
+  };
+
+  return (
+    <>
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: "black",
+          borderBottom: "1px solid white",
+          boxShadow: "none",
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar disableGutters>
+            {/* Desktop logo */}
+            <Box
+              component={NavLink}
+              to="/landing"
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                mr: 2,
+                textDecoration: "none",
+                userSelect: "none",
+                cursor: "pointer",
+              }}
             >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorElNav}
-              anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-              keepMounted
-              transformOrigin={{ vertical: "top", horizontal: "left" }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: "block", md: "none" } }}
+              <Box
+                component="img"
+                src={WebLogo}
+                alt="Logo"
+                sx={{ height: 40, pointerEvents: "none" }}
+              />
+            </Box>
+
+            {/* Mobile menu icon */}
+            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <IconButton
+                size="large"
+                aria-label="open navigation menu"
+                onClick={handleOpenNavMenu}
+                color="inherit"
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorElNav}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                keepMounted
+                transformOrigin={{ vertical: "top", horizontal: "left" }}
+                open={Boolean(anchorElNav)}
+                onClose={handleCloseNavMenu}
+                sx={{ display: { xs: "block", md: "none" } }}
+              >
+                {pages.map((page) => (
+                  <MenuItem key={page.label} onClick={handleCloseNavMenu}>
+                    <NavLink
+                      to={page.path}
+                      style={({ isActive }) => ({
+                        textDecoration: "none",
+                        color: isActive ? "orange" : "black",
+                        fontWeight: 600,
+                      })}
+                    >
+                      {page.label}
+                    </NavLink>
+                  </MenuItem>
+                ))}
+              </Menu>
+            </Box>
+
+            {/* Mobile logo */}
+            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <Typography
+              variant="h5"
+              noWrap
+              component="a"
+              href="#"
+              sx={{
+                mr: 2,
+                display: { xs: "flex", md: "none" },
+                flexGrow: 1,
+                fontWeight: 700,
+                letterSpacing: ".3rem",
+                color: "inherit",
+                textDecoration: "none",
+              }}
+            >
+              LOGO
+            </Typography>
+
+            {/* Desktop navigation links */}
+            <Box
+              sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, ml: 4 }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.label} onClick={handleCloseNavMenu}>
-                  <NavLink
-                    to={page.path}
-                    style={({ isActive }) => ({
-                      textDecoration: "none",
-                      color: isActive ? "orange" : "black",
-                      fontWeight: 600,
-                    })}
-                  >
-                    {page.label}
-                  </NavLink>
-                </MenuItem>
+                <Button
+                  key={page.label}
+                  component={NavLink}
+                  to={page.path}
+                  onClick={handleCloseNavMenu}
+                  sx={{
+                    my: 2,
+                    mx: 1.5,
+                    color: "white",
+                    textTransform: "none",
+                    fontWeight: 600,
+                    "&.active": {
+                      color: "orange",
+                      borderBottom: "2px solid orange",
+                      borderRadius: 0,
+                    },
+                    "&:hover": {
+                      backgroundColor: "transparent",
+                      color: "orange",
+                    },
+                  }}
+                >
+                  {page.label}
+                </Button>
               ))}
-            </Menu>
-          </Box>
+            </Box>
 
-          {/* Mobile logo */}
-          <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
-          <Typography
-            variant="h5"
-            noWrap
-            component="a"
-            href="#"
-            sx={{
-              mr: 2,
-              display: { xs: "flex", md: "none" },
-              flexGrow: 1,
-              fontWeight: 700,
-              letterSpacing: ".3rem",
-              color: "inherit",
-              textDecoration: "none",
-            }}
-          >
-            LOGO
-          </Typography>
-
-          {/* Desktop navigation links */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" }, ml: 4 }}>
-            {pages.map((page) => (
+            {/* Right side buttons */}
+            <Box
+              sx={{
+                display: { xs: "none", md: "flex" },
+                alignItems: "center",
+                ml: 2,
+              }}
+            >
               <Button
-                key={page.label}
-                component={NavLink}
-                to={page.path}
-                onClick={handleCloseNavMenu}
+                variant="text"
+                startIcon={<StarIcon />}
+                onClick={toggleWatchlistView}
                 sx={{
-                  my: 2,
-                  mx: 1.5,
-                  color: "white",
+                  color: isWatchlistView ? "orange" : "white", // Highlight when active
                   textTransform: "none",
-                  fontWeight: 600,
-                  "&.active": {
-                    color: "orange",
-                    borderBottom: "2px solid orange",
-                    borderRadius: 0,
-                  },
                   "&:hover": {
-                    backgroundColor: "transparent",
                     color: "orange",
+                    backgroundColor: "transparent",
                   },
                 }}
               >
-                {page.label}
+                Watchlist
               </Button>
-            ))}
-          </Box>
+              <Button
+                variant="outlined"
+                onClick={handleLoginClick}
+                sx={{
+                  color: "white",
+                  borderColor: "orange",
+                  textTransform: "none",
+                  ml: 2,
+                  "&:hover": {
+                    color: "black",
+                    backgroundColor: "orange",
+                    borderColor: "orange",
+                  },
+                }}
+              >
+                Login
+              </Button>
+              <IconButton sx={{ ml: 2 }}>
+                <PersonIcon sx={{ color: "orange", fontSize: 28 }} />
+              </IconButton>
+            </Box>
+          </Toolbar>
+        </Container>
+      </AppBar>
 
-          {/* Right side buttons */}
+      {/* Floating Login Box – replaces Dialog */}
+      {loginOpen && (
+        <ClickAwayListener onClickAway={handleLoginClose}>
           <Box
             sx={{
-              display: { xs: "none", md: "flex" },
-              alignItems: "center",
-              ml: 2,
+              position: "fixed", // ✅ fixed to screen, no layout impact
+              top: 24,
+              right: 32,
+              zIndex: 1300,
+              pointerEvents: "auto", // ✅ allow interaction inside
             }}
           >
-            <Button
-              variant="text"
-              startIcon={<StarIcon />}
-              sx={{
-                color: "white",
-                textTransform: "none",
-                "&:hover": {
-                  color: "orange",
-                  backgroundColor: "transparent",
-                },
-              }}
-            >
-              Watchlist
-            </Button>
-            <Button
-              variant="outlined"
-              sx={{
-                color: "white",
-                borderColor: "orange",
-                textTransform: "none",
-                ml: 2,
-                "&:hover": {
-                  color: "black",
-                  backgroundColor: "orange",
-                  borderColor: "orange",
-                },
-              }}
-            >
-              Login
-            </Button>
-            <IconButton sx={{ ml: 2 }}>
-              <PersonIcon sx={{ color: "orange", fontSize: 28 }} />
-            </IconButton>
+            <OAuthSignInPage />
           </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+        </ClickAwayListener>
+      )}
+    </>
   );
 }
 

@@ -1,11 +1,11 @@
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { WatchlistProvider } from "./DiscoverPage/WatchlistFunctionality";
 import ResponsiveAppBar from "./AppBar";
 import Landing from "./pages/Landing"; // stub file
 import Discover from "./pages/Discover"; // NEW: you'll move StickyHeadTable here
 import Analytics from "./pages/Analytics"; // stub file
 import About from "./pages/About"; // stub file
-import APIPlatform from "./pages/APIPlatform"; // stub file
 import "./App.css";
 
 const theme = createTheme({
@@ -17,18 +17,19 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Router>
-        <ResponsiveAppBar />
-        <div style={{ padding: "24px" }}>
-          <Routes>
-            <Route path="/" element={<Discover />} />
-            <Route path="/landing" element={<Landing />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/api-platform" element={<APIPlatform />} />
-          </Routes>
-        </div>
-      </Router>
+      <WatchlistProvider>
+        <Router>
+          <ResponsiveAppBar />
+          <div style={{ padding: "24px" }}>
+            <Routes>
+              <Route path="/" element={<Discover />} />
+              <Route path="/landing" element={<Landing />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/about" element={<About />} />
+            </Routes>
+          </div>
+        </Router>
+      </WatchlistProvider>
     </ThemeProvider>
   );
 }
