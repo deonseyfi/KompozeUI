@@ -2,7 +2,12 @@ import React from 'react';
 import { Box } from '@mui/material';
 import CandleChartWithDots from './CandleChartWithDots'; // Adjust the import path as necessary
 
-const TradingChart: React.FC = () => {
+interface TradingChartProps {
+  candlestickdata: any; // Replace with actual type if available
+  tweets: any;
+}
+
+const TradingChart: React.FC<TradingChartProps> = ({ candlestickdata, tweets }) => {
   return (
     <Box
       height={400}
