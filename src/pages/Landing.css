@@ -1,0 +1,213 @@
+/* Reset and base styles */
+html, body, #root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Full-screen layout */
+.landing-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  background: black; /* Complete black start */
+  overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+/* Text block */
+.overlay-text {
+  font-size: 1.3rem;
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  max-width: 500px; /* Reduced width for right side positioning */
+  margin: 0; /* Remove auto centering */
+  position: absolute; /* Changed from relative */
+  right: 20rem; /* Position from right edge */
+  top: 50%; /* Vertically center */
+  transform: translateY(-50%); /* Adjust for true vertical centering */
+  z-index: 2;
+  box-sizing: border-box;
+  color: white;
+  text-align: left; /* Changed from center to left */
+  opacity: 0;
+}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .overlay-text {
+    right: 1rem;
+    max-width: 300px;
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .overlay-text {
+    right: 1rem;
+    left: 1rem;
+    max-width: none;
+    width: calc(100% - 2rem);
+    position: relative;
+    top: auto;
+    transform: none;
+    margin-top: 2rem;
+  }
+}
+.kompoz-text,
+.voices-text {
+  color: #ff6600;
+  position: relative;
+}
+
+/* Add subtle text glow effect */
+.kompoz-text::after,
+.voices-text::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  filter: blur(8px);
+  opacity: 0.7;
+  background: #ff6600;
+  animation: textPulse 3s infinite alternate;
+}
+
+@keyframes textPulse {
+  from { opacity: 0.3; filter: blur(8px); }
+  to { opacity: 0.7; filter: blur(12px); }
+}
+
+/* Robot section - improved centering */
+.robot-wrapper {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Use clamp for responsive height - min: 200px, preferred: 40vh, max: 400px */
+  height: clamp(200px, 40vh, 400px);
+  pointer-events: none;
+  z-index: 1;
+  visibility: visible;
+  opacity: 0;
+  text-align: center;
+  transition: none;
+}
+
+.robot-layers {
+  position: relative;
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
+  display: inline-block;
+}
+
+/* Base robot image - responsive */
+.robot-layer {
+  position: relative;
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
+  width: auto;
+  display: block;
+}
+
+/* All glow layers aligned perfectly with the base image */
+.glow-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  /* Match the wrapper height */
+  height: clamp(200px, 40vh, 400px);
+  width: auto; 
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Light beam from eyes - responsive */
+.robot-wrapper::before {
+  content: '';
+  position: absolute;
+  /* Scale top position with robot size */
+  top: calc(clamp(200px, 40vh, 400px) * 0.2); /* 20% from top */
+  left: 50%;
+  transform: translateX(-50%);
+  /* Scale beam dimensions */
+  width: calc(clamp(200px, 40vh, 400px) * 0.375); /* 37.5% of robot height */
+  height: calc(clamp(200px, 40vh, 400px) * 0.625); /* 62.5% of robot height */
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255, 166, 0, 0.4) 0%,
+    rgba(255, 166, 0, 0.2) 30%,
+    transparent 70%
+  );
+  /* Scale blur with size */
+  filter: blur(clamp(6px, 1.2vh, 12px));
+  opacity: 0;
+  animation: beamFadeIn 2s ease-in-out 9s forwards;
+}
+
+/* Floor glow beneath robot - responsive */
+.robot-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  /* Scale floor glow */
+  width: calc(clamp(200px, 40vh, 400px) * 0.5); /* 50% of robot height */
+  height: calc(clamp(200px, 40vh, 400px) * 0.05); /* 5% of robot height */
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 102, 0, 0.6) 0%,
+    rgba(255, 102, 0, 0.1) 70%,
+    transparent 100%
+  );
+  /* Scale blur */
+  filter: blur(clamp(4px, 0.8vh, 8px));
+  opacity: 0;
+  animation: floorGlowFadeIn 2s ease-in-out 9s forwards;
+}
+
+/* Responsive glow filter adjustments */
+@media (max-width: 768px) {
+  .glow-eyes {
+    filter: brightness(3) blur(0px); /* Reduced brightness for smaller screens */
+  }
+  
+  .glow-chest {
+    filter: brightness(2.5); /* Reduced brightness */
+  }
+  
+  .glow-name {
+    filter: brightness(15); /* Reduced brightness */
+  }
+}
+/* Floor glow beneath robot */
+.robot-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 20px;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 102, 0, 0.6) 0%,
+    rgba(255, 102, 0, 0.1) 70%,
+    transparent 100%
+  );
+  filter: blur(8px);
+  opacity: 0;
+  animation: floorGlowFadeIn 2s ease-in-out 9s forwards;
+}
+
+@keyframes floorGlowFadeIn {
+  from { opacity: 0; }
+  to { opacity: 0.7; }
+}
