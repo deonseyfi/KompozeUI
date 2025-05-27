@@ -1,104 +1,90 @@
 .ticker-bar {
-    /* background: linear-gradient(135deg, #000000 0%, #b94a00 100%); */
-    /* border-bottom: 1px solid #e51e1e; */
-    height: 50spx;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    overflow: hidden;
-    padding-top: 10px;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* background: linear-gradient(135deg, #000000 0%, #b94a00 100%); */
+  /* border-bottom: 1px solid #e51e1e; */
+  height: 50px;
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow: hidden;
+  padding-top: 10px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.ticker-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.ticker-scroll {
+  display: flex;
+  align-items: center;
+  animation: scroll 120s linear infinite;
+  white-space: nowrap;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 6px; /* Small gap between symbol, price, and percentage */
+  margin-right: 50px; /* Big space after each complete group */
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.crypto-symbol {
+  color: #fff;
+  font-weight: 600;
+}
+
+.crypto-price {
+  color: #f0f0f0;
+}
+
+.crypto-change {
+  font-weight: 600;
+}
+
+.crypto-change.positive {
+  color: #00d4aa;
+}
+
+.crypto-change.negative {
+  color: #ff4757;
+}
+
+.loading-text, .error-text {
+  color: #888;
+  font-size: 13px;
+  margin-left: 20px;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
   }
-  
-  .ticker-content {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
+  100% {
+    transform: translateX(-100%);
   }
-  
-  .ticker-scroll {
-    display: flex;
-    align-items: center;
-    animation: scroll 120s linear infinite;
-    white-space: nowrap;
+}
+
+.ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ticker-bar {
+    height: 35px;
   }
   
   .ticker-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-right: 40px;
-    font-size: 13px;
-    font-weight: 500;
+    margin-right: 35px;
+    font-size: 12px;
+    gap: 4px;
   }
-  
-  .crypto-symbol {
-    color: #fff;
-    font-weight: 600;
-    min-width: 45px;
-  }
-  
-  .crypto-price {
-    color: #f0f0f0;
-    min-width: 70px;
-  }
-  
-  .crypto-change {
-    font-weight: 600;
-    min-width: 60px;
-  }
-  
-  .crypto-change.positive {
-    color: #00d4aa;
-  }
-  
-  .crypto-change.negative {
-    color: #ff4757;
-  }
-  
-  .loading-text, .error-text {
-    color: #888;
-    font-size: 13px;
-    margin-left: 20px;
-  }
-  
-  @keyframes scroll {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-  
-  .ticker-scroll:hover {
-    animation-play-state: paused;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .ticker-bar {
-      height: 35px;
-    }
-    
-    .ticker-item {
-      margin-right: 30px;
-      font-size: 12px;
-    }
-    
-    .crypto-symbol {
-      min-width: 35px;
-    }
-    
-    .crypto-price {
-      min-width: 60px;
-    }
-    
-    .crypto-change {
-      min-width: 50px;
-    }
-  }
+}

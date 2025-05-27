@@ -20,6 +20,7 @@
     "@types/react": "^19.1.4",
     "@types/react-dom": "^19.1.5",
     "cryptocurrency-icons": "^0.18.1",
+    "firebase": "^11.8.1",
     "gsap": "^3.13.0",
     "lightweight-charts": "^5.0.7",
     "react": "^19.1.0",
@@ -53,9 +54,7 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
-  
-  ,
+  },
   "devDependencies": {
     "@types/babel__core": "^7.20.5",
     "@types/babel__generator": "^7.27.0",
@@ -69,6 +68,5 @@
     "@types/stack-utils": "^2.0.3",
     "@types/yargs": "^17.0.33",
     "@types/yargs-parser": "^21.0.3"
-    
   }
 }

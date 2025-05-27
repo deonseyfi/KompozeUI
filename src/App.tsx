@@ -7,6 +7,9 @@ import About from "./pages/About";
 import APIPlatform from "./pages/APIPlatform";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
+import { AuthProvider } from "./ProfilePage/Components/AuthContext";
+
+
 import "./App.css";
 
 const theme = createTheme({
@@ -18,6 +21,7 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <AuthProvider>
       <Router>
         <Routes>
           {/* 🔹 Landing with isolated layout */}
@@ -65,6 +69,7 @@ function App() {
           />
         </Routes>
       </Router>
+      </AuthProvider>
     </ThemeProvider>
   );
 }
