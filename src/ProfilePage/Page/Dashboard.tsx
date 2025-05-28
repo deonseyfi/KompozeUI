@@ -24,7 +24,7 @@ const Dashboard: React.FC = () => {
     const [selectedCoin, setSelectedCoin] = useState<string>(COINS[0].symbol);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const { data, loading, error } = useUserSentiment('apechartz'); 
-    const { cryptodata, cryptoloading, cryptoerror } = useCryptoPrice('BTC','2024-01-01',new Date().toString(),'daily'); // Assuming this is the correct hook for crypto data
+    const { cryptodata, cryptoloading, cryptoerror } = useCryptoPrice(selectedCoin, '2024-01-01', new Date().toString(), 'daily'); // Assuming this is the correct hook for crypto data
     const coinList: Coin[] = [];
     const cryptoPrice: CandlestickData[] = [];
     const tweets: any[] = []
@@ -62,7 +62,7 @@ const Dashboard: React.FC = () => {
       }));
       coinList.push(...coinObjects);
       if (data.data && typeof data.data === 'object' && 'BTC' in data.data) {
-        (data.data as Record<string, any>)["BTC"]["tweets"].forEach((tweet: any) => {
+        (data.data as Record<string, any>)[selectedCoin]["tweets"].forEach((tweet: any) => {
           tweets.push({
             tweet: tweet.text,
             sentimentRating: tweet.sentiment_score,
