@@ -53,6 +53,5 @@ export const useCryptoPrice = (symbol: string, timeStart: string, timeEnd: strin
 
     fetchCryptoPrice();
   }, [symbol, timeStart, timeEnd, interval]);
-  console.log('Crypto Price Data:', state.cryptodata);
   return state;
 };

@@ -50,7 +50,7 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
                 {row.tweet}
               </TableCell>
               <TableCell sx={{ color: "white", borderBottom: "1px solid #333" }} align="right">{row.sentimentRating}</TableCell>
-              <TableCell sx={{ color: "white", borderBottom: "1px solid #333" }} align="right">{row.accuracy}%</TableCell>
+              <TableCell sx={{ color: "white", borderBottom: "1px solid #333" }} align="right">{row.accuracy}</TableCell>
               <TableCell sx={{ color: "white", borderBottom: "1px solid #333" }} align="right">{row.time}</TableCell>
             </TableRow>
           ))}

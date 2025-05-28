@@ -19,7 +19,7 @@ const TradingChart: React.FC<TradingChartProps> = ({ candlestickdata, tweets }) 
       alignItems="center"
     >
       {/* TODO: swap this out for your TradingView widget or other chart component */}
-      <CandleChartWithDots />
+      <CandleChartWithDots candlestickdata={candlestickdata} tweets={tweets} />
     </Box>
   );
 };
