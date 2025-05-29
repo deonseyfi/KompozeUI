@@ -29,7 +29,7 @@ export const useUserSentiment = (username: string) => {
       setState(s => ({ ...s, loading: true, error: null }));
 
       try {
-        const url = `http://localhost:8001/usersentiment${encodeURIComponent(
+        const url = `http://localhost:8001/usersentiment/${encodeURIComponent(
           username
         )}`;
         const res = await fetch(url, { signal: controller.signal });
