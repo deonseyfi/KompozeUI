@@ -6,16 +6,32 @@ html, body, #root {
   overflow: hidden;
 }
 
-/* Full-screen layout */
+.landing-page::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-image: url('../assets/honey2.png'); /* Replace with your texture file path */
+  background-repeat: no-repeat;
+  background-size: 100%; /* Adjust size as needed */
+  opacity: 0.5; /* Adjust opacity to taste */
+  pointer-events: none;
+  z-index: 0; /* Behind everything else */
+}
+
+/* Make sure your main content is above the texture */
 .landing-page {
   position: relative;
   width: 100vw;
   height: 100vh;
   margin: 0;
   padding: 0;
-  background: black; /* Complete black start */
+  background: black;
   overflow: hidden;
   transition: background 0.5s ease;
+  z-index: 1;
 }
 
 /* Text block */

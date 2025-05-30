@@ -1,7 +1,7 @@
 .ticker-bar {
     /* background: linear-gradient(135deg, #000000 0%, #b94a00 100%); */
     /* border-bottom: 1px solid #e51e1e; */
-    height: 50spx;
+    height: 50px;
     width: 100%;
     position: fixed;
     top: 0;
@@ -30,8 +30,8 @@
   .ticker-item {
     display: flex;
     align-items: center;
-    gap: 8px;
-    margin-right: 40px;
+    gap: 4px; /* Reduced gap between symbol, price, and percentage */
+    margin-right: 24px; /* Space between each complete item */
     font-size: 13px;
     font-weight: 500;
   }
@@ -39,17 +39,17 @@
   .crypto-symbol {
     color: #fff;
     font-weight: 600;
-    min-width: 45px;
+    /* Removed min-width to allow natural sizing */
   }
   
   .crypto-price {
     color: #f0f0f0;
-    min-width: 70px;
+    /* Removed min-width to allow natural sizing */
   }
   
   .crypto-change {
     font-weight: 600;
-    min-width: 60px;
+    /* Removed min-width to allow natural sizing */
   }
   
   .crypto-change.positive {
@@ -86,9 +86,11 @@
     }
     
     .ticker-item {
-      margin-right: 30px;
+      margin-right: 20px; /* Adjusted for mobile */
       font-size: 12px;
+      gap: 3px; /* Slightly smaller gap on mobile */
     }
+  
     
     .crypto-symbol {
       min-width: 35px;

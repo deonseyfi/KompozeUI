@@ -39,7 +39,7 @@ export const useCryptoPrice = (symbol: string, timeStart: string, timeEnd: strin
           interval,
         });
 
-        const response = await fetch(`http://localhost:5000/crypto-price?${queryParams}`);
+        const response = await fetch(`http://localhost:5001/crypto-price?${queryParams}`);
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
