@@ -125,7 +125,7 @@ function LandingAppBar() {
               alignItems: "center",
             }}
           >
-            <Button
+            {/* <Button
               variant="text"
               startIcon={<StarIcon />}
               sx={{
@@ -138,7 +138,7 @@ function LandingAppBar() {
               }}
             >
               Watchlist
-            </Button>
+            </Button> */}
             <Button
               variant="outlined"
               sx={{

@@ -206,10 +206,10 @@ useEffect(() => {
   // 6. Sunrise background animation
   if (backgroundRef.current) {
     masterTimeline.to(backgroundRef.current, {
-      background: 'radial-gradient(ellipse at bottom left, rgba(255, 119, 0, 0.85) 10%, rgba(220, 33, 33, 0.95) 30%, black 100%)',
+      background: 'radial-gradient(ellipse at bottom left, rgba(255, 119, 0, 1.0) 10%, rgba(220, 33, 33, 0.95) 30%, black 100%)',
       duration: 5,
       ease: 'power1.inOut'
-    });
+    },2);
   }
   
   // 7. Create combined pulse animation for chest and name lights
