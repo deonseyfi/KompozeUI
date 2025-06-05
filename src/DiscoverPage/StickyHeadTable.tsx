@@ -27,6 +27,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import FilterListIcon from "@mui/icons-material/FilterList";
 import StarIcon from "@mui/icons-material/Star";
 import StarBorderIcon from "@mui/icons-material/StarBorder";
+import { useNavigate } from "react-router-dom";
 import {
   applyFilters,
   FilterState,
@@ -67,7 +68,7 @@ async function fetchUserSentiment(): Promise<RowData[]> {
     const apiData = await response.json();
     return Object.entries(apiData.data).map(
       ([username, userData]: [string, any]) => ({
-        username: `@${username}`,
+        username: username,
         timeframe: formatTimeFrame(userData.timeFrame),
         lastUpdated: formatDate(userData.latestTweet),
         accuracy: Math.round(userData.sentimentScore * 100),
@@ -181,6 +182,12 @@ export default function EnhancedTable() {
     userWatchlist
   );
 
+  const navigate = useNavigate();
+  //In order to make it user specific some logic will be needed here
+  const handleRowClick = (username: string) => {
+    navigate(`/analytics/${username.replace("@", "")}`);
+  };
+
   if (loading) {
     return (
       <Box
@@ -272,7 +279,18 @@ export default function EnhancedTable() {
               {filteredRows
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row: RowData, index: number) => (
-                  <TableRow hover key={index}>
+                  <TableRow
+                    hover
+                    key={index}
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 140, 0, 0.12) !important",
+                      },
+                      transition: "background-color 0.3s ease",
+                    }}
+                    onClick={() => handleRowClick(`@${row.username}`)}
+                  >
                     <TableCell sx={cellStyle}>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
@@ -284,9 +302,10 @@ export default function EnhancedTable() {
                         >
                           <PersonIcon />
                         </Avatar>
-                        {row.username}
+                        @{row.username} {/* ✅ prepend @ for display */}
                       </Box>
                     </TableCell>
+
                     <TableCell sx={cellStyle}>{row.timeframe}</TableCell>
                     <TableCell sx={cellStyle}>
                       <Typography>{row.lastUpdated}</Typography>
@@ -303,7 +322,10 @@ export default function EnhancedTable() {
                     </TableCell>
                     <TableCell sx={{ ...cellStyle, textAlign: "center" }}>
                       <IconButton
-                        onClick={() => toggleUserWatchlist(row.username)}
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click from firing
+                          toggleUserWatchlist(row.username);
+                        }}
                         sx={{
                           color: isInUserWatchlist(row.username)
                             ? "orange"

@@ -17,10 +17,10 @@ import WebLogo from "./newlogo4.png";
 import { useAuth } from "./ProfilePage/Components/BackendAuthContext";
 import LoginModal from "./ProfilePage/Components/LoginModal";
 import { useWatchlist } from "./DiscoverPage/WatchlistFunctionality";
+import GlassmorphismAccountPopup from "./DiscoverPage/GlassmorphismAccountPopup";
 
 const pages = [
   { label: "Discover", path: "/" },
-  { label: "Analytics", path: "/analytics" },
   { label: "About Us", path: "/about" },
   { label: "API Platform", path: "/api-platform" },
 ];
@@ -33,10 +33,10 @@ function ResponsiveAppBar() {
     null
   );
   const [loginModalOpen, setLoginModalOpen] = React.useState(false);
+  const [glassPopupOpen, setGlassPopupOpen] = React.useState(false);
 
   const { user, isAuthenticated, logout } = useAuth();
-  const { toggleUserWatchlistView, isUserWatchlistView } =
-    useWatchlist();
+  const { toggleUserWatchlistView, isUserWatchlistView } = useWatchlist();
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -44,6 +44,7 @@ function ResponsiveAppBar() {
 
   const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElUser(event.currentTarget);
+    setGlassPopupOpen(true);
   };
 
   const handleCloseNavMenu = () => {
@@ -52,6 +53,7 @@ function ResponsiveAppBar() {
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null);
+    setGlassPopupOpen(false);
   };
 
   const handleLoginClick = () => {
@@ -60,7 +62,8 @@ function ResponsiveAppBar() {
 
   const handleLogout = () => {
     logout();
-    handleCloseUserMenu();
+    setGlassPopupOpen(false);
+    setAnchorElUser(null);
   };
 
   return (
@@ -172,22 +175,6 @@ function ResponsiveAppBar() {
                   <IconButton onClick={handleOpenUserMenu} sx={{ ml: 1 }}>
                     <PersonIcon sx={{ color: "orange", fontSize: 28 }} />
                   </IconButton>
-                  <Menu
-                    anchorEl={anchorElUser}
-                    open={Boolean(anchorElUser)}
-                    onClose={handleCloseUserMenu}
-                    sx={{
-                      "& .MuiPaper-root": {
-                        backgroundColor: "#1a1a1a",
-                        color: "white",
-                      },
-                    }}
-                  >
-                    <MenuItem onClick={handleLogout}>
-                      <LogoutIcon sx={{ mr: 1 }} />
-                      Logout
-                    </MenuItem>
-                  </Menu>
                 </>
               ) : (
                 <>
@@ -343,6 +330,16 @@ function ResponsiveAppBar() {
           </Toolbar>
         </Container>
       </AppBar>
+
+      {/* Glassmorphism Account Popup - Only show when authenticated */}
+      {isAuthenticated && (
+        <GlassmorphismAccountPopup
+          anchorEl={anchorElUser}
+          open={glassPopupOpen}
+          onClose={handleCloseUserMenu}
+          onLogout={handleLogout}
+        />
+      )}
 
       <LoginModal
         open={loginModalOpen}

@@ -1,11 +1,4 @@
 import React, { useState } from "react";
-import {
-  Container,
-  Box,
-  Typography,
-  Paper,
-  CircularProgress,
-} from "@mui/material";
 import UserHeader from "../Components/UserHeader";
 import CoinTabs, { Coin } from "../Components/CoinTabs";
 import SearchAccounts from "../Components/SearchAccounts";
@@ -14,6 +7,7 @@ import TweetTable, { TweetRecord } from "../Components/TweetTable";
 import { getCoinIcon } from "../Components/Icons";
 import { useUserSentiment } from "../apidata/UserProfilePageData";
 import { useCryptoPrice } from "../apidata/CrytpoData";
+import { useParams } from "react-router-dom";
 import {
   LineData,
   CandlestickData,
@@ -21,6 +15,14 @@ import {
   BusinessDay,
   UTCTimestamp,
 } from "lightweight-charts";
+import {
+  Container,
+  Box,
+  Typography,
+  Paper,
+  CircularProgress,
+} from "@mui/material";
+
 
 const COINS: Coin[] = [
   { symbol: "BTC", imageUrl: getCoinIcon("btc") },
@@ -32,6 +34,62 @@ const COINS: Coin[] = [
 ];
 
 const Dashboard: React.FC = () => {
+  const [selectedCoin, setSelectedCoin] = useState<string>(COINS[0].symbol);
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const { username } = useParams<{ username: string }>();
+  const selectedUser = username ?? "apechartz";
+  const { data, loading, error } = useUserSentiment(selectedUser);
+  const { cryptodata, cryptoloading, cryptoerror } = useCryptoPrice(
+    selectedCoin,
+    "2024-01-01",
+    new Date().toString(),
+    "daily"
+  ); // Assuming this is the correct hook for crypto data
+  const coinList: Coin[] = [];
+  const cryptoPrice: CandlestickData[] = [];
+  const tweets: any[] = [];
+
+  // Remove soon and clean up
+  if (cryptoloading) {
+    return <div>Loading crypto data...</div>;
+  }
+  if (cryptoerror) {
+    return <div>Error fetching crypto data: {cryptoerror}</div>;
+  }
+
+  // Crytpo Pricing Data
+  if (cryptodata?.data) {
+    // Assuming cryptodata.data is an array of candlestick data
+    const dataArray = Object.entries(cryptodata.data);
+    // Create new array of CandlestickData objects
+    dataArray.map((item) => {
+      const date = item[1]["time"];
+      const timeStamp = new Date(date).getTime();
+      const open = parseFloat(item[1]["open"]);
+      const high = parseFloat(item[1]["high"]);
+      const low = parseFloat(item[1]["low"]);
+      const close = parseFloat(item[1]["close"]);
+
+      cryptoPrice.push({
+        time: timeStamp as UTCTimestamp,
+        open,
+        high,
+        low,
+        close,
+      });
+    });
+  }
+  //Coin Array Creation
+  if (data) {
+    const coins = data.data ? Object.keys(data.data) : [];
+    const coinObjects: Coin[] = coins.map((coin) => ({
+      symbol: coin,
+      imageUrl: getCoinIcon(coin.toLowerCase()),
+    }));
+    coinList.push(...coinObjects);
+    if (data.data && typeof data.data === "object" && "BTC" in data.data) {
+      (data.data as Record<string, any>)[selectedCoin]["tweets"].forEach(
+        (tweet: any) => {
   const [selectedCoin, setSelectedCoin] = useState<string>(COINS[0].symbol);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const { data, loading, error } = useUserSentiment("apechartz");
@@ -165,8 +223,23 @@ const Dashboard: React.FC = () => {
       );
     }
   }
+  // Create better options for loading and errors
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
+          });
+        }
+      );
+    }
+  }
 
   return (
+    <Container maxWidth="lg" sx={{ py: 2, backgroundColor: "black" }}>
+      <UserHeader
+        username={`@${selectedUser}`}
+        // NEEDS WORK TO GET REAL TIME
+        avgTimeframe="Short Term"
+        accuracy={84}
+      />
     <Box
       sx={{
         backgroundColor: "#000",
@@ -409,6 +482,24 @@ const Dashboard: React.FC = () => {
         <Box sx={{ height: "100px" }} />
       </Container>
     </Box>
+      <Box
+        display="flex"
+        justifyContent="space-between"
+        alignItems="center"
+        mb={2}
+      >
+        <CoinTabs
+          coins={coinList}
+          selected={selectedCoin}
+          onChange={setSelectedCoin}
+        />
+        <SearchAccounts onSearch={setSearchTerm} />
+      </Box>
+
+      <TradingChart candlestickdata={cryptoPrice} tweets={tweets} />
+
+      <TweetTable records={tweets} />
+    </Container>
   );
 };
 
@@ -435,3 +526,4 @@ export function findDuplicateTimes(data: CandlestickData[]): Object[] {
   // Remove repeated entries in dupes (if a timestamp occurs > 2 times)
   return Array.from(new Set(dupes));
 }
+

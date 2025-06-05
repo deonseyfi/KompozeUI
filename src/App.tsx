@@ -44,7 +44,7 @@ function App() {
                 }
               />
               <Route
-                path="/analytics"
+                path="/analytics/:username"
                 element={
                   <MainLayout>
                     <Analytics />
