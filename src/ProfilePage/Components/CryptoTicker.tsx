@@ -103,7 +103,7 @@ const CryptoTickerBar: React.FC = () => {
     return (
       <div className="ticker-bar">
         <div className="ticker-content">
-          <div className="loading-text">Loading crypto prices...</div>
+          
         </div>
       </div>
     );

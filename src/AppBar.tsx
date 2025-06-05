@@ -66,13 +66,14 @@ function ResponsiveAppBar() {
   return (
     <>
       <AppBar
-        position="static"
+        position="sticky"
         sx={{
           backgroundColor: "black",
           borderBottom: "1px solid rgba(255, 255, 255, 0.2)",
           borderTop: "1px solid rgba(255, 255, 255, 0.2)",
           boxShadow: "none",
-          marginTop: "35px",
+          top: 0,
+          zIndex: 1200,
         }}
       >
         <Container
