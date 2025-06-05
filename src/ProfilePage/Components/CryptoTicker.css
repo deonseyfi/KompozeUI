@@ -1,106 +1,109 @@
 .ticker-bar {
-    /* background: linear-gradient(135deg, #000000 0%, #b94a00 100%); */
-    /* border-bottom: 1px solid #e51e1e; */
-    height: 50px;
-    width: 100%;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 1000;
-    overflow: hidden;
-    padding-top: 10px;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+  border-bottom: 1px solid rgba(255, 165, 0, 0.3);
+  height: 40px;
+  width: 100%;
+  position: relative;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+  overflow: hidden;
+  padding-top: 10px;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.ticker-content {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ticker-scroll {
+  display: flex;
+  align-items: center;
+  animation: scroll 120s linear infinite;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.ticker-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.crypto-symbol {
+  color: #fff;
+  font-weight: 600;
+  min-width: 40px;
+}
+
+.crypto-price {
+  color: #f0f0f0;
+  min-width: 80px;
+}
+
+.crypto-change {
+  font-weight: 600;
+  min-width: 60px;
+}
+
+.crypto-change.positive {
+  color: #00d4aa;
+}
+
+.crypto-change.negative {
+  color: #ff4757;
+}
+
+.loading-text, .error-text {
+  color: #888;
+  font-size: 13px;
+  margin-left: 20px;
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(100%);
   }
-  
-  .ticker-content {
-    height: 100%;
-    display: flex;
-    align-items: center;
-    position: relative;
-    overflow: hidden;
+  100% {
+    transform: translateX(-100%);
   }
-  
-  .ticker-scroll {
-    display: flex;
-    align-items: center;
-    animation: scroll 120s linear infinite;
-    white-space: nowrap;
+}
+
+.ticker-scroll:hover {
+  animation-play-state: paused;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .ticker-bar {
+    height: 35px;
   }
   
   .ticker-item {
-    display: flex;
-    align-items: center;
-    gap: 4px; /* Reduced gap between symbol, price, and percentage */
-    margin-right: 24px; /* Space between each complete item */
-    font-size: 13px;
-    font-weight: 500;
+    margin-right: 20px;
+    font-size: 12px;
+    gap: 6px;
   }
-  
+
   .crypto-symbol {
-    color: #fff;
-    font-weight: 600;
-    /* Removed min-width to allow natural sizing */
+    min-width: 35px;
   }
   
   .crypto-price {
-    color: #f0f0f0;
-    /* Removed min-width to allow natural sizing */
+    min-width: 60px;
   }
   
   .crypto-change {
-    font-weight: 600;
-    /* Removed min-width to allow natural sizing */
+    min-width: 50px;
   }
-  
-  .crypto-change.positive {
-    color: #00d4aa;
-  }
-  
-  .crypto-change.negative {
-    color: #ff4757;
-  }
-  
-  .loading-text, .error-text {
-    color: #888;
-    font-size: 13px;
-    margin-left: 20px;
-  }
-  
-  @keyframes scroll {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(-100%);
-    }
-  }
-  
-  .ticker-scroll:hover {
-    animation-play-state: paused;
-  }
-  
-  /* Responsive adjustments */
-  @media (max-width: 768px) {
-    .ticker-bar {
-      height: 35px;
-    }
-    
-    .ticker-item {
-      margin-right: 20px; /* Adjusted for mobile */
-      font-size: 12px;
-      gap: 3px; /* Slightly smaller gap on mobile */
-    }
-  
-    
-    .crypto-symbol {
-      min-width: 35px;
-    }
-    
-    .crypto-price {
-      min-width: 60px;
-    }
-    
-    .crypto-change {
-      min-width: 50px;
-    }
-  }
+}
