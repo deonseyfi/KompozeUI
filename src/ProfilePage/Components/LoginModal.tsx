@@ -17,7 +17,7 @@ import {
   Google as GoogleIcon,
   Twitter as TwitterIcon,
 } from "@mui/icons-material";
-import { useAuth } from "./BackendAuthContext";
+import { useAuth } from "./BackendAuthContext"; // Keep the same import
 
 interface LoginModalProps {
   open: boolean;
@@ -49,8 +49,12 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
         setSuccessMessage("Password reset email sent! Check your inbox.");
       } else if (isSignUp) {
         await register(email, password, name);
-        onClose();
-        resetForm();
+        setSuccessMessage("Account created! Please check your email to verify your account.");
+        // Don't close modal immediately for signup - let them see the success message
+        setTimeout(() => {
+          onClose();
+          resetForm();
+        }, 2000);
       } else {
         await login(email, password);
         onClose();
@@ -58,7 +62,24 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       }
     } catch (err: any) {
       console.error("Auth error:", err);
-      setError(err.message || "Authentication failed");
+      
+      // Handle common Firebase auth errors with user-friendly messages
+      let errorMessage = err.message;
+      if (err.message.includes("user-not-found")) {
+        errorMessage = "No account found with this email address.";
+      } else if (err.message.includes("wrong-password")) {
+        errorMessage = "Incorrect password. Please try again.";
+      } else if (err.message.includes("email-already-in-use")) {
+        errorMessage = "An account with this email already exists.";
+      } else if (err.message.includes("weak-password")) {
+        errorMessage = "Password should be at least 6 characters long.";
+      } else if (err.message.includes("invalid-email")) {
+        errorMessage = "Please enter a valid email address.";
+      } else if (err.message.includes("too-many-requests")) {
+        errorMessage = "Too many failed attempts. Please try again later.";
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -73,7 +94,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       resetForm();
     } catch (err: any) {
       console.error("Google login error:", err);
-      setError(err.message || "Google login failed");
+      let errorMessage = err.message;
+      if (err.message.includes("popup-closed-by-user")) {
+        errorMessage = "Sign-in was cancelled.";
+      } else if (err.message.includes("popup-blocked")) {
+        errorMessage = "Please allow popups for this site and try again.";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -88,7 +115,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       resetForm();
     } catch (err: any) {
       console.error("Twitter login error:", err);
-      setError(err.message || "Twitter login failed");
+      let errorMessage = err.message;
+      if (err.message.includes("popup-closed-by-user")) {
+        errorMessage = "Sign-in was cancelled.";
+      } else if (err.message.includes("popup-blocked")) {
+        errorMessage = "Please allow popups for this site and try again.";
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

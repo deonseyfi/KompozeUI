@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Landing.css";
 import videoFile from "../assets/bgvid3.mp4";
 
@@ -11,7 +12,8 @@ import glowName from "../assets/z31name.png";
 const Landing = () => {
   const [showSite, setShowSite] = useState(false);
   const [fadeOut, setFadeOut] = useState(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const videoRef = useRef(null);
+  const navigate = useNavigate();
 
   // Check if user has already seen the intro this session
   useEffect(() => {
@@ -52,105 +54,69 @@ const Landing = () => {
     return () => clearTimeout(timer);
   }, [showSite]);
 
+  // Generate stars - WHITE AND ORANGE ONLY
+  const generateStars = () => {
+    const stars = [];
+    const starTypes = ["", "orange"]; // Only white (empty string) and orange
+
+    // Generate 120 stars total
+    for (let i = 0; i < 120; i++) {
+      const starType = starTypes[i % 2]; // Alternate between white and orange
+      stars.push(<div key={i} className={`shooting-star ${starType}`}></div>);
+    }
+
+    return stars;
+  };
+
+  // Handle get started button click
+  const handleGetStarted = () => {
+    navigate("/");
+  };
+
   if (showSite) {
     return (
       <div className="main-site">
-        {/* Floating particles */}
-        <div className="floating-particles">
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
-          <div className="particle"></div>
+        {/* Twinkling stars container with many more stars */}
+        <div className="shooting-stars">{generateStars()}</div>
+
+        {/* Centered Caption */}
+        <div className="main-caption">
+          <h1>Future of Media Analytics</h1>
+          <p>Quantifying crypto influence through AI-driven tweet intelligence.</p>
         </div>
 
-        {/* Twinkling stars container */}
-        <div className="shooting-stars">
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star orange"></div>
-          <div className="shooting-star"></div>
-          <div className="shooting-star blue"></div>
-          <div className="shooting-star"></div>
-        </div>
-
-        <div className="overlay-text">
-          <h1>
-            <span className="kompoz-text">{`{Kompoz}`}</span> the chaos.
-            <br />
-            Follow the <span className="voices-text">voices</span> that move the
-            markets.
-          </h1>
-          <p>
-            We harness the power of AI to analyze crypto Twitter/X.
-            <br />
-            Our platform filters the noise, breaking down each post into
-            actionable insights using NLP and price data correlation.
-          </p>
+        {/* Get Started Button */}
+        <div className="get-started-wrapper">
+          <button className="get-started-btn" onClick={handleGetStarted}>
+            Let's Get Started
+          </button>
         </div>
 
         <div className="robot-wrapper">
-          <div className="robot-layers">
-            <img src={robotBase} alt="Robot Base" className="robot-layer" />
-            <img
-              src={glowChest}
-              alt="Glow Chest"
-              className="glow-layer glow-chest"
-            />
-            <img
-              src={glowName}
-              alt="Glow Name"
-              className="glow-layer glow-name"
-            />
-            <img
-              src={glowMouth}
-              alt="Glow Mouth"
-              className="glow-layer glow-mouth"
-            />
-            <img
-              src={glowEyes}
-              alt="Glow Eyes"
-              className="glow-layer glow-eyes"
-            />
+          <div className="robot-animation">
+            <div className="robot-layers">
+              <img src={robotBase} alt="Robot Base" className="robot-layer" />
+              <img
+                src={glowChest}
+                alt="Glow Chest"
+                className="glow-layer glow-chest"
+              />
+              <img
+                src={glowName}
+                alt="Glow Name"
+                className="glow-layer glow-name"
+              />
+              <img
+                src={glowMouth}
+                alt="Glow Mouth"
+                className="glow-layer glow-mouth"
+              />
+              <img
+                src={glowEyes}
+                alt="Glow Eyes"
+                className="glow-layer glow-eyes"
+              />
+            </div>
           </div>
         </div>
       </div>
