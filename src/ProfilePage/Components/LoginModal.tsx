@@ -49,7 +49,9 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
         setSuccessMessage("Password reset email sent! Check your inbox.");
       } else if (isSignUp) {
         await register(email, password, name);
-        setSuccessMessage("Account created! Please check your email to verify your account.");
+        setSuccessMessage(
+          "Account created! Please check your email to verify your account."
+        );
         // Don't close modal immediately for signup - let them see the success message
         setTimeout(() => {
           onClose();
@@ -62,7 +64,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       }
     } catch (err: any) {
       console.error("Auth error:", err);
-      
+
       // Handle common Firebase auth errors with user-friendly messages
       let errorMessage = err.message;
       if (err.message.includes("user-not-found")) {
@@ -78,7 +80,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       } else if (err.message.includes("too-many-requests")) {
         errorMessage = "Too many failed attempts. Please try again later.";
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -149,7 +151,7 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
 
   const getTitle = () => {
     if (isForgotPassword) return "Reset Password";
-    return isSignUp ? "Create Account" : "Welcome Back";
+    return isSignUp ? "Create Account" : "Login";
   };
 
   const getButtonText = () => {
@@ -169,9 +171,13 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
       fullWidth
       PaperProps={{
         sx: {
-          backgroundColor: "#1a1a1a",
-          color: "white",
-          borderRadius: 2,
+          background: "rgba(30, 30, 30, 0.95)",
+          backdropFilter: "blur(20px)",
+          WebkitBackdropFilter: "blur(20px)",
+          color: "#FFFFFF",
+          borderRadius: "12px",
+          border: "1px solid rgba(255, 255, 255, 0.1)",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.8)",
         },
       }}
     >
@@ -180,21 +186,40 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
+          background:
+            "linear-gradient(135deg, rgba(40, 40, 40, 0.8), rgba(20, 20, 20, 0.9))",
+          borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
         }}
       >
-        <Typography variant="h5" sx={{ color: "white", fontWeight: 600 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            color: "#FFFFFF",
+            fontWeight: 600,
+            letterSpacing: "0.02em",
+          }}
+        >
           {getTitle()}
         </Typography>
-        <IconButton onClick={handleClose} sx={{ color: "white" }}>
+        <IconButton
+          onClick={handleClose}
+          sx={{
+            color: "rgba(255, 255, 255, 0.7)",
+            "&:hover": {
+              color: "#FFFFFF",
+              backgroundColor: "rgba(255, 255, 255, 0.08)",
+            },
+          }}
+        >
           <CloseIcon />
         </IconButton>
       </DialogTitle>
 
-      <DialogContent>
+      <DialogContent sx={{ padding: "32px 24px 24px 24px" }}>
         {/* Social Login Buttons - Only show for login/signup, not forgot password */}
         {!isForgotPassword && (
           <>
-            <Stack spacing={2} sx={{ mb: 3 }}>
+            <Stack spacing={2} sx={{ mb: 3, mt: 2 }}>
               <Button
                 fullWidth
                 variant="outlined"
@@ -202,16 +227,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 onClick={handleGoogleLogin}
                 disabled={loading}
                 sx={{
-                  borderColor: "#555",
-                  color: "white",
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                  color: "rgba(255, 255, 255, 0.9)",
                   py: 1.5,
+                  background: "rgba(255, 255, 255, 0.05)",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease",
                   "&:hover": {
-                    borderColor: "#orange",
-                    backgroundColor: "rgba(255, 102, 0, 0.1)",
+                    borderColor: "orange",
+                    backgroundColor: "rgba(255, 165, 0, 0.1)",
+                    color: "#FFFFFF",
                   },
                   "&:disabled": {
-                    borderColor: "#333",
-                    color: "#666",
+                    borderColor: "rgba(255, 255, 255, 0.1)",
+                    color: "rgba(255, 255, 255, 0.4)",
+                    backgroundColor: "rgba(255, 255, 255, 0.02)",
                   },
                 }}
               >
@@ -225,16 +255,21 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 onClick={handleTwitterLogin}
                 disabled={loading}
                 sx={{
-                  borderColor: "#555",
-                  color: "white",
+                  borderColor: "rgba(255, 255, 255, 0.2)",
+                  color: "rgba(255, 255, 255, 0.9)",
                   py: 1.5,
+                  background: "rgba(255, 255, 255, 0.05)",
+                  borderRadius: "8px",
+                  transition: "all 0.2s ease",
                   "&:hover": {
                     borderColor: "#1DA1F2",
                     backgroundColor: "rgba(29, 161, 242, 0.1)",
+                    color: "#FFFFFF",
                   },
                   "&:disabled": {
-                    borderColor: "#333",
-                    color: "#666",
+                    borderColor: "rgba(255, 255, 255, 0.1)",
+                    color: "rgba(255, 255, 255, 0.4)",
+                    backgroundColor: "rgba(255, 255, 255, 0.02)",
                   },
                 }}
               >
@@ -242,8 +277,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
               </Button>
             </Stack>
 
-            <Divider sx={{ my: 2, borderColor: "#555" }}>
-              <Typography variant="body2" sx={{ color: "#ccc" }}>
+            <Divider sx={{ my: 2, borderColor: "rgba(255, 255, 255, 0.1)" }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  fontSize: "13px",
+                }}
+              >
                 OR
               </Typography>
             </Divider>
@@ -253,7 +294,19 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
         {/* Email/Password Form */}
         <Box component="form" onSubmit={handleSubmit} sx={{ mt: 1 }}>
           {error && (
-            <Alert severity="error" sx={{ mb: 2, backgroundColor: "#d32f2f" }}>
+            <Alert
+              severity="error"
+              sx={{
+                mb: 2,
+                backgroundColor: "rgba(211, 47, 47, 0.15)",
+                border: "1px solid rgba(211, 47, 47, 0.3)",
+                borderRadius: "8px",
+                color: "#ff6b6b",
+                "& .MuiAlert-icon": {
+                  color: "#ff6b6b",
+                },
+              }}
+            >
               {error}
             </Alert>
           )}
@@ -261,7 +314,16 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           {successMessage && (
             <Alert
               severity="success"
-              sx={{ mb: 2, backgroundColor: "#2e7d32" }}
+              sx={{
+                mb: 2,
+                backgroundColor: "rgba(46, 125, 50, 0.15)",
+                border: "1px solid rgba(46, 125, 50, 0.3)",
+                borderRadius: "8px",
+                color: "#4caf50",
+                "& .MuiAlert-icon": {
+                  color: "#4caf50",
+                },
+              }}
             >
               {successMessage}
             </Alert>
@@ -270,7 +332,15 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
           {/* Forgot Password Form */}
           {isForgotPassword ? (
             <>
-              <Typography variant="body2" sx={{ color: "#ccc", mb: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "rgba(255, 255, 255, 0.6)",
+                  mb: 2,
+                  fontSize: "14px",
+                  lineHeight: 1.5,
+                }}
+              >
                 Enter your email address and we'll send you a link to reset your
                 password.
               </Typography>
@@ -285,14 +355,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 sx={{
                   mb: 2,
                   "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#2d2d2d",
-                    color: "white",
-                    "& fieldset": { borderColor: "#555" },
-                    "&:hover fieldset": { borderColor: "#orange" },
-                    "&.Mui-focused fieldset": { borderColor: "#orange" },
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    color: "#FFFFFF",
+                    borderRadius: "8px",
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 165, 0, 0.5)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "orange",
+                    },
                   },
-                  "& .MuiInputLabel-root": { color: "#ccc" },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#orange" },
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255, 255, 255, 0.6)",
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "orange",
+                  },
                 }}
               />
 
@@ -303,12 +384,23 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 disabled={loading}
                 sx={{
                   mb: 2,
-                  backgroundColor: "#ff6600",
-                  color: "white",
+                  backgroundColor: "orange",
+                  color: "#FFFFFF",
                   fontWeight: 600,
                   py: 1.5,
-                  "&:hover": { backgroundColor: "#e55a00" },
-                  "&:disabled": { backgroundColor: "#555" },
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontSize: "14px",
+                  letterSpacing: "0.01em",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "#e55a00",
+                    boxShadow: "0 4px 12px rgba(255, 165, 0, 0.3)",
+                  },
+                  "&:disabled": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "rgba(255, 255, 255, 0.4)",
+                  },
                 }}
               >
                 {getButtonText()}
@@ -319,7 +411,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                   variant="text"
                   onClick={handleBackToLogin}
                   disabled={loading}
-                  sx={{ color: "#orange", textTransform: "none" }}
+                  sx={{
+                    color: "orange",
+                    textTransform: "none",
+                    fontSize: "14px",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 165, 0, 0.08)",
+                    },
+                  }}
                 >
                   ← Back to Sign In
                 </Button>
@@ -337,14 +436,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                   sx={{
                     mb: 2,
                     "& .MuiOutlinedInput-root": {
-                      backgroundColor: "#2d2d2d",
-                      color: "white",
-                      "& fieldset": { borderColor: "#555" },
-                      "&:hover fieldset": { borderColor: "#orange" },
-                      "&.Mui-focused fieldset": { borderColor: "#orange" },
+                      backgroundColor: "rgba(255, 255, 255, 0.05)",
+                      color: "#FFFFFF",
+                      borderRadius: "8px",
+                      "& fieldset": {
+                        borderColor: "rgba(255, 255, 255, 0.2)",
+                      },
+                      "&:hover fieldset": {
+                        borderColor: "rgba(255, 165, 0, 0.5)",
+                      },
+                      "&.Mui-focused fieldset": {
+                        borderColor: "orange",
+                      },
                     },
-                    "& .MuiInputLabel-root": { color: "#ccc" },
-                    "& .MuiInputLabel-root.Mui-focused": { color: "#orange" },
+                    "& .MuiInputLabel-root": {
+                      color: "rgba(255, 255, 255, 0.6)",
+                    },
+                    "& .MuiInputLabel-root.Mui-focused": {
+                      color: "orange",
+                    },
                   }}
                 />
               )}
@@ -359,14 +469,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 sx={{
                   mb: 2,
                   "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#2d2d2d",
-                    color: "white",
-                    "& fieldset": { borderColor: "#555" },
-                    "&:hover fieldset": { borderColor: "#orange" },
-                    "&.Mui-focused fieldset": { borderColor: "#orange" },
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    color: "#FFFFFF",
+                    borderRadius: "8px",
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 165, 0, 0.5)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "orange",
+                    },
                   },
-                  "& .MuiInputLabel-root": { color: "#ccc" },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#orange" },
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255, 255, 255, 0.6)",
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "orange",
+                  },
                 }}
               />
 
@@ -380,14 +501,25 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 sx={{
                   mb: 2,
                   "& .MuiOutlinedInput-root": {
-                    backgroundColor: "#2d2d2d",
-                    color: "white",
-                    "& fieldset": { borderColor: "#555" },
-                    "&:hover fieldset": { borderColor: "#orange" },
-                    "&.Mui-focused fieldset": { borderColor: "#orange" },
+                    backgroundColor: "rgba(255, 255, 255, 0.05)",
+                    color: "#FFFFFF",
+                    borderRadius: "8px",
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.2)",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 165, 0, 0.5)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "orange",
+                    },
                   },
-                  "& .MuiInputLabel-root": { color: "#ccc" },
-                  "& .MuiInputLabel-root.Mui-focused": { color: "#orange" },
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255, 255, 255, 0.6)",
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: "orange",
+                  },
                 }}
               />
 
@@ -399,11 +531,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                     onClick={() => setIsForgotPassword(true)}
                     disabled={loading}
                     sx={{
-                      color: "#orange",
+                      color: "orange",
                       textTransform: "none",
                       p: 0,
                       minWidth: "auto",
-                      fontSize: "0.875rem",
+                      fontSize: "14px",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 165, 0, 0.08)",
+                      },
                     }}
                   >
                     Forgot Password?
@@ -418,19 +553,36 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                 disabled={loading}
                 sx={{
                   mb: 2,
-                  backgroundColor: "#ff6600",
-                  color: "white",
+                  backgroundColor: "orange",
+                  color: "#FFFFFF",
                   fontWeight: 600,
                   py: 1.5,
-                  "&:hover": { backgroundColor: "#e55a00" },
-                  "&:disabled": { backgroundColor: "#555" },
+                  borderRadius: "8px",
+                  textTransform: "none",
+                  fontSize: "14px",
+                  letterSpacing: "0.01em",
+                  transition: "all 0.2s ease",
+                  "&:hover": {
+                    backgroundColor: "#e55a00",
+                    boxShadow: "0 4px 12px rgba(255, 165, 0, 0.3)",
+                  },
+                  "&:disabled": {
+                    backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    color: "rgba(255, 255, 255, 0.4)",
+                  },
                 }}
               >
                 {getButtonText()}
               </Button>
 
               <Box sx={{ textAlign: "center", mt: 2 }}>
-                <Typography variant="body2" sx={{ color: "#ccc" }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "rgba(255, 255, 255, 0.6)",
+                    fontSize: "14px",
+                  }}
+                >
                   {isSignUp
                     ? "Already have an account?"
                     : "Don't have an account?"}{" "}
@@ -439,10 +591,14 @@ const LoginModal: React.FC<LoginModalProps> = ({ open, onClose }) => {
                     onClick={() => setIsSignUp(!isSignUp)}
                     disabled={loading}
                     sx={{
-                      color: "#orange",
+                      color: "orange",
                       textTransform: "none",
                       p: 0,
                       minWidth: "auto",
+                      fontSize: "14px",
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 165, 0, 0.08)",
+                      },
                     }}
                   >
                     {isSignUp ? "Sign In" : "Sign Up"}
