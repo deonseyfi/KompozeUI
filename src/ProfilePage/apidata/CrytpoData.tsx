@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
 
 
 export interface CryptoPriceData {
@@ -25,12 +26,15 @@ export const useCryptoPrice = (symbol: string, timeStart: string, timeEnd: strin
     cryptoerror: null,
   });
 
+
   useEffect(() => {
     if (!symbol || !timeStart || !timeEnd || !interval) return;
 
+
     const fetchCryptoPrice = async () => {
       setState({ cryptodata: null, cryptoloading: true, cryptoerror: null });
-
+      const auth = getAuth();
+      const token = await auth.currentUser?.getIdToken();
       try {
         const queryParams = new URLSearchParams({
           symbol,
@@ -39,7 +43,14 @@ export const useCryptoPrice = (symbol: string, timeStart: string, timeEnd: strin
           interval,
         });
 
-        const response = await fetch(`http://localhost:5001/crypto-price?${queryParams}`);
+        const response = await fetch(`http://localhost:5001/crypto-price?${queryParams}`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
         if (!response.ok) {
           throw new Error(`Error: ${response.statusText}`);
         }
