@@ -5,6 +5,22 @@ import React, {
   useEffect,
   ReactNode,
 } from "react";
+import {
+  User as FirebaseUser,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  GoogleAuthProvider,
+  TwitterAuthProvider,
+  signInWithPopup,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  updateProfile,
+  updateEmail,
+} from "firebase/auth";
+import { doc, setDoc, getDoc, updateDoc } from "firebase/firestore";
+import { auth, db } from "./firebase-conifg";
 
 interface User {
   id: string;
@@ -50,73 +66,64 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Backend API configuration
-const API_BASE_URL = "http://localhost:8000/api";
+// Convert Firebase User to our User interface
+const convertFirebaseUser = async (
+  firebaseUser: FirebaseUser
+): Promise<User> => {
+  // Get additional user data from Firestore
+  const userDocRef = doc(db, "users", firebaseUser.uid);
+  const userDoc = await getDoc(userDocRef);
+  const userData = userDoc.exists() ? userDoc.data() : {};
+
+  return {
+    id: firebaseUser.uid,
+    email: firebaseUser.email || "",
+    name: firebaseUser.displayName || userData.name || undefined,
+    photoURL: firebaseUser.photoURL || userData.photoURL || undefined,
+    provider: firebaseUser.providerData[0]?.providerId || "email",
+    emailVerified: firebaseUser.emailVerified,
+    watchlist: userData.watchlist || [],
+    preferences: userData.preferences || {
+      notifications: true,
+      theme: "dark",
+    },
+    createdAt:
+      userData.createdAt?.toDate() ||
+      new Date(firebaseUser.metadata.creationTime || Date.now()),
+  };
+};
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Helper function to make authenticated requests
-  const apiRequest = async (endpoint: string, options: RequestInit = {}) => {
-    const token = localStorage.getItem("authToken");
-
-    const config: RequestInit = {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(token && { Authorization: `Bearer ${token}` }),
-        ...options.headers,
-      },
-    };
-
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(
-        errorData.message || `HTTP error! status: ${response.status}`
-      );
-    }
-
-    return response.json();
-  };
-
-  // Check for existing session on app load
+  // Listen for authentication state changes
   useEffect(() => {
-    const checkAuthStatus = async () => {
-      try {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-          // Verify token with backend
-          const userData = await apiRequest("/auth/verify");
-          setUser(userData.user);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const userData = await convertFirebaseUser(firebaseUser);
+          setUser(userData);
+        } catch (error) {
+          console.error("Error loading user data:", error);
+          setUser(null);
         }
-      } catch (error) {
-        console.error("Auth verification failed:", error);
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("user");
-      } finally {
-        setLoading(false);
+      } else {
+        setUser(null);
       }
-    };
+      setLoading(false);
+    });
 
-    checkAuthStatus();
+    return unsubscribe;
   }, []);
 
   // Email/password login
   const login = async (email: string, password: string): Promise<void> => {
     try {
-      const response = await apiRequest("/auth/login", {
-        method: "POST",
-        body: JSON.stringify({ email, password }),
-      });
-
-      localStorage.setItem("authToken", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      setUser(response.user);
-    } catch (error) {
-      throw error;
+      await signInWithEmailAndPassword(auth, email, password);
+      // User state will be updated automatically via onAuthStateChanged
+    } catch (error: any) {
+      throw new Error(error.message || "Login failed");
     }
   };
 
@@ -127,200 +134,157 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     name?: string
   ): Promise<void> => {
     try {
-      const response = await apiRequest("/auth/register", {
-        method: "POST",
-        body: JSON.stringify({ email, password, name }),
-      });
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
 
-      localStorage.setItem("authToken", response.token);
-      localStorage.setItem("user", JSON.stringify(response.user));
-      setUser(response.user);
-    } catch (error) {
-      throw error;
+      // Update the user's display name if provided
+      if (name && userCredential.user) {
+        await updateProfile(userCredential.user, {
+          displayName: name,
+        });
+      }
+
+      // Create user document in Firestore
+      if (userCredential.user) {
+        const userDocRef = doc(db, "users", userCredential.user.uid);
+        await setDoc(userDocRef, {
+          name: name || "",
+          email: userCredential.user.email,
+          watchlist: [],
+          preferences: {
+            notifications: true,
+            theme: "dark",
+          },
+          createdAt: new Date(),
+        });
+
+        // Send verification email
+        await sendEmailVerification(userCredential.user);
+      }
+    } catch (error: any) {
+      throw new Error(error.message || "Registration failed");
     }
   };
 
   // Google OAuth login
   const loginWithGoogle = async (): Promise<void> => {
     try {
-      // Get Google OAuth URL from backend
-      const response = await apiRequest("/auth/google/url");
-      const authUrl = response.url;
+      const provider = new GoogleAuthProvider();
+      // Optional: Add additional scopes
+      provider.addScope("profile");
+      provider.addScope("email");
 
-      // Open popup window for Google OAuth
-      const popup = window.open(
-        authUrl,
-        "google-oauth",
-        "width=500,height=600,scrollbars=yes,resizable=yes"
-      );
-
-      // Listen for popup completion
-      return new Promise((resolve, reject) => {
-        const checkPopup = setInterval(() => {
-          try {
-            if (popup?.closed) {
-              clearInterval(checkPopup);
-              // Check if login was successful
-              const token = localStorage.getItem("authToken");
-              const userData = localStorage.getItem("user");
-
-              if (token && userData) {
-                setUser(JSON.parse(userData));
-                resolve();
-              } else {
-                reject(new Error("Google login cancelled or failed"));
-              }
-            }
-          } catch (error) {
-            clearInterval(checkPopup);
-            reject(error);
-          }
-        }, 1000);
-
-        // Handle popup messages
-        const handleMessage = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data.type === "GOOGLE_AUTH_SUCCESS") {
-            localStorage.setItem("authToken", event.data.token);
-            localStorage.setItem("user", JSON.stringify(event.data.user));
-            setUser(event.data.user);
-            popup?.close();
-            clearInterval(checkPopup);
-            window.removeEventListener("message", handleMessage);
-            resolve();
-          } else if (event.data.type === "GOOGLE_AUTH_ERROR") {
-            popup?.close();
-            clearInterval(checkPopup);
-            window.removeEventListener("message", handleMessage);
-            reject(new Error(event.data.error));
-          }
-        };
-
-        window.addEventListener("message", handleMessage);
-      });
-    } catch (error) {
-      throw error;
+      await signInWithPopup(auth, provider);
+      // User state will be updated automatically via onAuthStateChanged
+    } catch (error: any) {
+      if (error.code === "auth/popup-closed-by-user") {
+        throw new Error("Google login was cancelled");
+      }
+      throw new Error(error.message || "Google login failed");
     }
   };
 
-  // Twitter OAuth login (similar to Google)
+  // Twitter OAuth login
   const loginWithTwitter = async (): Promise<void> => {
     try {
-      const response = await apiRequest("/auth/twitter/url");
-      const authUrl = response.url;
-
-      const popup = window.open(
-        authUrl,
-        "twitter-oauth",
-        "width=500,height=600,scrollbars=yes,resizable=yes"
-      );
-
-      return new Promise((resolve, reject) => {
-        const checkPopup = setInterval(() => {
-          try {
-            if (popup?.closed) {
-              clearInterval(checkPopup);
-              const token = localStorage.getItem("authToken");
-              const userData = localStorage.getItem("user");
-
-              if (token && userData) {
-                setUser(JSON.parse(userData));
-                resolve();
-              } else {
-                reject(new Error("Twitter login cancelled or failed"));
-              }
-            }
-          } catch (error) {
-            clearInterval(checkPopup);
-            reject(error);
-          }
-        }, 1000);
-
-        const handleMessage = (event: MessageEvent) => {
-          if (event.origin !== window.location.origin) return;
-
-          if (event.data.type === "TWITTER_AUTH_SUCCESS") {
-            localStorage.setItem("authToken", event.data.token);
-            localStorage.setItem("user", JSON.stringify(event.data.user));
-            setUser(event.data.user);
-            popup?.close();
-            clearInterval(checkPopup);
-            window.removeEventListener("message", handleMessage);
-            resolve();
-          } else if (event.data.type === "TWITTER_AUTH_ERROR") {
-            popup?.close();
-            clearInterval(checkPopup);
-            window.removeEventListener("message", handleMessage);
-            reject(new Error(event.data.error));
-          }
-        };
-
-        window.addEventListener("message", handleMessage);
-      });
-    } catch (error) {
-      throw error;
+      const provider = new TwitterAuthProvider();
+      await signInWithPopup(auth, provider);
+      // User state will be updated automatically via onAuthStateChanged
+    } catch (error: any) {
+      if (error.code === "auth/popup-closed-by-user") {
+        throw new Error("Twitter login was cancelled");
+      }
+      throw new Error(error.message || "Twitter login failed");
     }
   };
 
   // Reset password
   const resetPassword = async (email: string): Promise<void> => {
     try {
-      await apiRequest("/auth/reset-password", {
-        method: "POST",
-        body: JSON.stringify({ email }),
-      });
-    } catch (error) {
-      throw error;
+      await sendPasswordResetEmail(auth, email);
+    } catch (error: any) {
+      throw new Error(error.message || "Password reset failed");
     }
   };
 
   // Logout
   const logout = async (): Promise<void> => {
     try {
-      await apiRequest("/auth/logout", { method: "POST" });
-    } catch (error) {
-      // Continue with logout even if backend request fails
-      console.error("Logout request failed:", error);
-    } finally {
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("user");
-      setUser(null);
+      await signOut(auth);
+      // User state will be updated automatically via onAuthStateChanged
+    } catch (error: any) {
+      throw new Error(error.message || "Logout failed");
     }
   };
 
   // Update user profile
   const updateUserProfile = async (data: Partial<User>): Promise<void> => {
     try {
-      const response = await apiRequest("/auth/profile", {
-        method: "PUT",
-        body: JSON.stringify(data),
-      });
+      if (!auth.currentUser) {
+        throw new Error("No user is currently signed in");
+      }
 
-      const updatedUser = { ...user, ...response.user };
-      localStorage.setItem("user", JSON.stringify(updatedUser));
-      setUser(updatedUser);
-    } catch (error) {
-      throw error;
+      const updates: any = {};
+
+      if (data.name !== undefined) {
+        updates.displayName = data.name;
+      }
+
+      if (data.photoURL !== undefined) {
+        updates.photoURL = data.photoURL;
+      }
+
+      // Update Firebase profile
+      if (Object.keys(updates).length > 0) {
+        await updateProfile(auth.currentUser, updates);
+      }
+
+      // Update email separately if provided
+      if (data.email && data.email !== auth.currentUser.email) {
+        await updateEmail(auth.currentUser, data.email);
+      }
+
+      // Update Firestore document with additional data
+      const userDocRef = doc(db, "users", auth.currentUser.uid);
+      const firestoreUpdates: any = {};
+
+      if (data.name !== undefined) firestoreUpdates.name = data.name;
+      if (data.watchlist !== undefined)
+        firestoreUpdates.watchlist = data.watchlist;
+      if (data.preferences !== undefined)
+        firestoreUpdates.preferences = data.preferences;
+
+      if (Object.keys(firestoreUpdates).length > 0) {
+        await updateDoc(userDocRef, firestoreUpdates);
+      }
+
+      // Update local state
+      if (user) {
+        setUser({ ...user, ...data });
+      }
+    } catch (error: any) {
+      throw new Error(error.message || "Profile update failed");
     }
   };
 
   // Send verification email
   const sendVerificationEmail = async (): Promise<void> => {
     try {
-      await apiRequest("/auth/send-verification", { method: "POST" });
-    } catch (error) {
-      throw error;
+      if (!auth.currentUser) {
+        throw new Error("No user is currently signed in");
+      }
+      await sendEmailVerification(auth.currentUser);
+    } catch (error: any) {
+      throw new Error(error.message || "Failed to send verification email");
     }
   };
 
-  // Resend verification email
+  // Resend verification email (same as send)
   const resendVerificationEmail = async (): Promise<void> => {
-    try {
-      await apiRequest("/auth/resend-verification", { method: "POST" });
-    } catch (error) {
-      throw error;
-    }
+    await sendVerificationEmail();
   };
 
   const value = {
