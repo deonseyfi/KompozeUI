@@ -1,4 +1,5 @@
 import * as React from "react";
+import { getAuth } from "firebase/auth";
 import {
   Avatar,
   Box,
@@ -59,10 +60,12 @@ const formatDate = (dateStr: string): string => {
 };
 
 async function fetchUserSentiment(): Promise<RowData[]> {
+  const auth = getAuth();
+  const token = await auth.currentUser?.getIdToken();
   try {
     const response = await fetch("http://localhost:8001/usersentiment", {
       method: "GET",
-      headers: { "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const apiData = await response.json();

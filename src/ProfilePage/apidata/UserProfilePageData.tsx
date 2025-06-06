@@ -1,5 +1,6 @@
 
 import { useEffect, useState } from "react";
+import { getAuth } from "firebase/auth";
 
 export interface UserSentiment {
     data: Object | null;        
@@ -24,6 +25,8 @@ export const useUserSentiment = (username: string) => {
   useEffect(() => {
     if (!username) return;     // guard against empty calls
 
+    const auth = getAuth()
+    const token = auth.currentUser?.getIdToken();
     const controller = new AbortController();
     const fetchData = async () => {
       setState(s => ({ ...s, loading: true, error: null }));
@@ -32,7 +35,10 @@ export const useUserSentiment = (username: string) => {
         const url = `http://localhost:8001/usersentiment/${encodeURIComponent(
           username
         )}`;
-        const res = await fetch(url, { signal: controller.signal });
+        const res = await fetch(url, { signal: controller.signal,   headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        }});
 
         if (!res.ok) {
           throw new Error(`API responded with ${res.status}`);
