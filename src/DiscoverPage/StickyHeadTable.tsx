@@ -65,7 +65,10 @@ async function fetchUserSentiment(): Promise<RowData[]> {
   try {
     const response = await fetch("http://localhost:8001/usersentiment", {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const apiData = await response.json();
@@ -102,6 +105,9 @@ export default function EnhancedTable() {
   const [rows, setRows] = React.useState<RowData[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [profilePics, setProfilePics] = React.useState<Record<string, string>>(
+    {}
+  );
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [filterAnchorEl, setFilterAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -119,6 +125,49 @@ export default function EnhancedTable() {
 
   const rowsPerPage = 9;
 
+  // Function to fetch profile picture
+  const fetchProfilePicture = async (
+    username: string
+  ): Promise<string | null> => {
+    const auth = getAuth();
+    const token = await auth.currentUser?.getIdToken();
+
+    try {
+      const response = await fetch(
+        `http://localhost:8001/profile-picture/${username}`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (!response.ok) {
+        console.error(`Failed to fetch profile picture for ${username}`);
+        return null;
+      }
+
+      const data = await response.json();
+      return data.profile_image_url;
+    } catch (error) {
+      console.error(`Error fetching profile picture for ${username}:`, error);
+      return null;
+    }
+  };
+
+  // Calculate filtered rows (moved before useEffect)
+  const searchFilteredRows = rows.filter((row) =>
+    row.username.toLowerCase().includes(search.toLowerCase())
+  );
+  const sortedAndFilteredRows = applyFilters(searchFilteredRows, filterState);
+  const filteredRows = filterUsersByWatchlist(
+    sortedAndFilteredRows,
+    isUserWatchlistView,
+    userWatchlist
+  );
+
   React.useEffect(() => {
     const loadData = async () => {
       try {
@@ -134,6 +183,35 @@ export default function EnhancedTable() {
     };
     loadData();
   }, []);
+
+  React.useEffect(() => {
+    const loadProfilePictures = async () => {
+      const newProfilePics: Record<string, string> = {};
+
+      // Get current visible usernames
+      const visibleRows = filteredRows.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+
+      for (const row of visibleRows) {
+        if (!profilePics[row.username]) {
+          const profilePicUrl = await fetchProfilePicture(row.username);
+          if (profilePicUrl) {
+            newProfilePics[row.username] = profilePicUrl;
+          }
+        }
+      }
+
+      if (Object.keys(newProfilePics).length > 0) {
+        setProfilePics((prev) => ({ ...prev, ...newProfilePics }));
+      }
+    };
+
+    if (rows.length > 0) {
+      loadProfilePictures();
+    }
+  }, [filteredRows, page, profilePics]); // Run when filtered rows or page changes
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -174,16 +252,6 @@ export default function EnhancedTable() {
   const handleClearFilters = () => {
     setFilterState(getDefaultFilterState());
   };
-
-  const searchFilteredRows = rows.filter((row) =>
-    row.username.toLowerCase().includes(search.toLowerCase())
-  );
-  const sortedAndFilteredRows = applyFilters(searchFilteredRows, filterState);
-  const filteredRows = filterUsersByWatchlist(
-    sortedAndFilteredRows,
-    isUserWatchlistView,
-    userWatchlist
-  );
 
   const navigate = useNavigate();
   //In order to make it user specific some logic will be needed here
@@ -297,13 +365,14 @@ export default function EnhancedTable() {
                     <TableCell sx={cellStyle}>
                       <Box display="flex" alignItems="center" gap={2}>
                         <Avatar
+                          src={profilePics[row.username] || undefined}
                           sx={{
                             border: "2px solid orange",
                             color: "orange",
                             bgcolor: "transparent",
                           }}
                         >
-                          <PersonIcon />
+                          {!profilePics[row.username] && <PersonIcon />}
                         </Avatar>
                         @{row.username} {/* ✅ prepend @ for display */}
                       </Box>
