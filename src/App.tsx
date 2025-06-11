@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing";
 import Discover from "./pages/Discover";
 import Analytics from "./pages/Analytics";
+import Dashboard from "./ProfilePage/Page/Dashboard"; // Add this import
 import About from "./pages/About";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
@@ -21,6 +22,7 @@ const theme = createTheme({
     },
   },
 });
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -28,7 +30,7 @@ function App() {
         <WatchlistProvider>
           <Router>
             <Routes>
-              {/* :small_blue_diamond: Landing with isolated layout */}
+              {/* Landing with isolated layout */}
               <Route
                 path="/landing"
                 element={
@@ -37,7 +39,7 @@ function App() {
                   </LandingLayout>
                 }
               />
-              {/* :small_orange_diamond: All other pages with navbar + padding */}
+              {/* Discover page (home) */}
               <Route
                 path="/"
                 element={
@@ -46,6 +48,7 @@ function App() {
                   </MainLayout>
                 }
               />
+              {/* Analytics page (general) */}
               <Route
                 path="/analytics"
                 element={
@@ -54,6 +57,16 @@ function App() {
                   </MainLayout>
                 }
               />
+              {/* Dashboard page with username parameter */}
+              <Route
+                path="/analytics/:username"
+                element={
+                  <MainLayout>
+                    <Dashboard />
+                  </MainLayout>
+                }
+              />
+              {/* About page */}
               <Route
                 path="/about"
                 element={
@@ -69,4 +82,5 @@ function App() {
     </ThemeProvider>
   );
 }
+
 export default App;

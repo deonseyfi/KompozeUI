@@ -22,7 +22,6 @@ import GlassmorphismAccountPopup from "./DiscoverPage/GlassmorphismAccountPopup"
 const pages = [
   { label: "Discover", path: "/" },
   { label: "About Us", path: "/about" },
-  { label: "API Platform", path: "/api-platform" },
 ];
 
 function ResponsiveAppBar() {
