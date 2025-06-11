@@ -5,7 +5,9 @@ import {
   Typography,
   Paper,
   CircularProgress,
+  Avatar,
 } from "@mui/material";
+import PersonIcon from "@mui/icons-material/Person";
 import UserHeader from "../Components/UserHeader";
 import CoinTabs, { Coin } from "../Components/CoinTabs";
 import SearchAccounts from "../Components/SearchAccounts";
@@ -15,6 +17,7 @@ import { getCoinIcon } from "../Components/Icons";
 import { useUserSentiment } from "../apidata/UserProfilePageData";
 import { useCryptoPrice } from "../apidata/CrytpoData";
 import { useParams } from "react-router-dom";
+import { getAuth } from "firebase/auth";
 import {
   LineData,
   CandlestickData,
@@ -64,6 +67,126 @@ const getAccuracyColor = (value: number) => {
   return "#FF0000";
 };
 
+// ✅ NEW: Function to upgrade Twitter image URLs to high resolution
+const upgradeTwitterImageUrl = (url: string): string => {
+  if (!url || !url.includes("twimg.com")) {
+    return url; // Not a Twitter image, return as-is
+  }
+
+  // Remove any existing size suffix and add high-res version
+  const highResUrl = url
+    .replace("_normal", "") // Remove _normal (48x48)
+    .replace("_bigger", "") // Remove _bigger (73x73)
+    .replace("_mini", "") // Remove _mini (24x24)
+    .replace(/\.(jpg|jpeg|png|webp)$/i, "_400x400.$1"); // Add _400x400 for 400x400px
+
+  console.log(
+    `🔧 Upgraded image URL: ${url.split("/").pop()} → ${highResUrl
+      .split("/")
+      .pop()}`
+  );
+  return highResUrl;
+};
+
+// ✅ UPDATED: Profile picture fetching function with high-res upgrade
+const fetchSingleProfilePicture = async (
+  username: string
+): Promise<string | null> => {
+  const auth = getAuth();
+  const token = await auth.currentUser?.getIdToken();
+
+  try {
+    const response = await fetch(
+      `http://localhost:8001/profile-picture/${username}`,
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Cache-Control": "public, max-age=86400",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      console.error(`Failed to fetch profile picture for ${username}`);
+      return null;
+    }
+
+    const data = await response.json();
+    let profileImageUrl = data.profile_image_url;
+
+    // ✅ UPGRADE TO HIGH RESOLUTION: Twitter provides different sizes
+    if (profileImageUrl) {
+      profileImageUrl = upgradeTwitterImageUrl(profileImageUrl);
+    }
+
+    return profileImageUrl;
+  } catch (error) {
+    console.error(`Error fetching profile picture for ${username}:`, error);
+    return null;
+  }
+};
+
+// ✅ UPDATED: Instagram-style image preloading
+const preloadImage = (url: string) => {
+  const img = new Image();
+  img.onload = () => {
+    console.log(`✅ Preloaded profile picture: ${url.split("/").pop()}`);
+  };
+  img.onerror = () => {
+    console.warn(`❌ Failed to preload profile picture: ${url}`);
+  };
+  img.src = url; // Browser automatically caches this
+};
+
+// ✅ UPDATED: Optimized Avatar component with high-quality rendering
+const OptimizedAvatar: React.FC<{
+  username: string;
+  profilePicUrl?: string;
+  size?: number;
+}> = ({ username, profilePicUrl, size = 56 }) => {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
+
+  // Reset states when URL changes
+  React.useEffect(() => {
+    if (profilePicUrl) {
+      setImageLoaded(false);
+      setImageError(false);
+      // ✅ PRELOAD: Start loading image immediately
+      preloadImage(profilePicUrl);
+    }
+  }, [profilePicUrl]);
+
+  return (
+    <Avatar
+      src={profilePicUrl && !imageError ? profilePicUrl : undefined}
+      sx={{
+        width: size,
+        height: size,
+        border: "3px solid orange",
+        color: "orange",
+        bgcolor: "transparent",
+        // ✅ SMOOTH TRANSITIONS: Like Instagram
+        transition: "all 0.3s ease-in-out",
+        opacity: profilePicUrl && !imageError && imageLoaded ? 1 : 0.8,
+        fontSize: size * 0.4, // Scale icon size with avatar size
+        // ✅ HIGH-QUALITY RENDERING: Better image quality
+        "& img": {
+          objectFit: "cover", // Ensure proper scaling
+          imageRendering: "high-quality", // Better image rendering
+          filter: "none", // No filters that could blur
+        },
+      }}
+      onLoad={() => setImageLoaded(true)}
+      onError={() => setImageError(true)}
+    >
+      {(!profilePicUrl || imageError) && <PersonIcon />}
+    </Avatar>
+  );
+};
+
 // Fetch user profile data (same API as StickyHeadTable)
 async function fetchUserProfileData(username: string): Promise<{
   timeframe: string;
@@ -100,6 +223,9 @@ const Dashboard: React.FC = () => {
     accuracy: number;
   } | null>(null);
   const [profileLoading, setProfileLoading] = useState<boolean>(true);
+  // ✅ ADDED: Profile picture state
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [profilePicLoading, setProfilePicLoading] = useState<boolean>(false);
 
   // User routing functionality from UserHookFunctionality branch
   const { username } = useParams<{ username: string }>();
@@ -117,16 +243,25 @@ const Dashboard: React.FC = () => {
   const cryptoPrice: CandlestickData[] = [];
   const tweets: any[] = [];
 
-  // Fetch user profile data on component mount or when selectedUser changes
+  // ✅ UPDATED: Fetch both user profile data and profile picture
   useEffect(() => {
-    const loadUserProfile = async () => {
+    const loadUserData = async () => {
       setProfileLoading(true);
-      const profile = await fetchUserProfileData(selectedUser);
+      setProfilePicLoading(true);
+
+      // Load profile data and profile picture in parallel
+      const [profile, profilePic] = await Promise.all([
+        fetchUserProfileData(selectedUser),
+        fetchSingleProfilePicture(selectedUser),
+      ]);
+
       setUserProfile(profile);
+      setProfilePicture(profilePic);
       setProfileLoading(false);
+      setProfilePicLoading(false);
     };
 
-    loadUserProfile();
+    loadUserData();
   }, [selectedUser]);
 
   // Use profile data or fallback values
@@ -278,7 +413,7 @@ const Dashboard: React.FC = () => {
           maxWidth: "none !important",
         }}
       >
-        {/* Header Section with dynamic user data from API and color-coded accuracy */}
+        {/* ✅ UPDATED: Header Section with high-res profile picture */}
         <Paper
           sx={{
             backgroundColor: "#111",
@@ -294,16 +429,25 @@ const Dashboard: React.FC = () => {
             flexWrap="wrap"
             gap={2}
           >
-            <Typography
-              variant="h4"
-              sx={{
-                color: "white",
-                fontWeight: "bold",
-                fontSize: { xs: "1.5rem", md: "2rem" },
-              }}
-            >
-              {`@${selectedUser}`}
-            </Typography>
+            {/* ✅ UPDATED: Username with high-res profile picture */}
+            <Box display="flex" alignItems="center" gap={2}>
+              <OptimizedAvatar
+                username={selectedUser}
+                profilePicUrl={profilePicture || undefined}
+                size={64} // Larger size for header
+              />
+              <Typography
+                variant="h4"
+                sx={{
+                  color: "white",
+                  fontWeight: "bold",
+                  fontSize: { xs: "1.5rem", md: "2rem" },
+                }}
+              >
+                {`@${selectedUser}`}
+              </Typography>
+            </Box>
+
             <Box display="flex" gap={3} alignItems="center" flexWrap="wrap">
               <Box textAlign="center">
                 <Typography

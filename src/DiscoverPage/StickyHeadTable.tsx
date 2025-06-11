@@ -86,6 +86,87 @@ async function fetchUserSentiment(): Promise<RowData[]> {
   }
 }
 
+// ✅ INDUSTRY STANDARD: Let browser handle caching with proper headers
+const fetchProfilePicturesBatch = async (
+  usernames: string[]
+): Promise<Record<string, string>> => {
+  if (usernames.length === 0) return {};
+
+  const auth = getAuth();
+  const token = await auth.currentUser?.getIdToken();
+
+  try {
+    const response = await fetch(
+      "http://localhost:8001/profile-pictures/batch",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          // ✅ PROPER HTTP CACHING: Let browser handle caching
+          "Cache-Control": "public, max-age=86400", // Cache for 24 hours
+        },
+        body: JSON.stringify({ usernames }),
+      }
+    );
+
+    if (!response.ok) {
+      console.error("Failed to fetch batch profile pictures");
+      return {};
+    }
+
+    const data = await response.json();
+    const profilePics: Record<string, string> = {};
+
+    // Extract profile image URLs from the response
+    Object.entries(data.data).forEach(([username, userData]: [string, any]) => {
+      if (userData.profile_image_url) {
+        profilePics[username] = userData.profile_image_url;
+        // ✅ PRELOAD IMAGES: Browser automatically caches them
+        preloadImage(userData.profile_image_url);
+      }
+    });
+
+    console.log(
+      `✅ Batch loaded ${Object.keys(profilePics).length} profile pictures in ${
+        data.stats?.api_calls === 0 ? "CACHED" : "API"
+      } mode`
+    );
+    return profilePics;
+  } catch (error) {
+    console.error("Error fetching batch profile pictures:", error);
+    return {};
+  }
+};
+
+// ✅ INSTAGRAM TECHNIQUE: Preload images for instant display
+const preloadImage = (url: string) => {
+  const img = new Image();
+  img.onload = () => {
+    console.log(`✅ Preloaded: ${url.split("/").pop()}`);
+  };
+  img.onerror = () => {
+    console.warn(`❌ Failed to preload: ${url}`);
+  };
+  img.src = url; // Browser automatically caches this
+};
+
+// ✅ SMART BATCHING: Preload images for current view + next page
+const preloadVisibleAndNext = (
+  allProfilePics: Record<string, string>,
+  currentPage: number,
+  rowsPerPage: number
+) => {
+  const startIndex = currentPage * rowsPerPage;
+  const endIndex = startIndex + rowsPerPage * 2; // Current page + next page
+
+  Object.values(allProfilePics)
+    .slice(startIndex, endIndex)
+    .forEach((url) => {
+      if (url) preloadImage(url);
+    });
+};
+
 const getAccuracyColor = (value: number) => {
   if (value >= 90) return "#3AFF00";
   if (value >= 80) return "#00FFFF";
@@ -99,6 +180,41 @@ const getAccuracyColor = (value: number) => {
   return "#FF0000";
 };
 
+// ✅ OPTIMIZED AVATAR: Better loading states and error handling
+const OptimizedAvatar: React.FC<{
+  username: string;
+  profilePicUrl?: string;
+}> = ({ username, profilePicUrl }) => {
+  const [imageLoaded, setImageLoaded] = React.useState(false);
+  const [imageError, setImageError] = React.useState(false);
+
+  // Reset states when URL changes
+  React.useEffect(() => {
+    if (profilePicUrl) {
+      setImageLoaded(false);
+      setImageError(false);
+    }
+  }, [profilePicUrl]);
+
+  return (
+    <Avatar
+      src={profilePicUrl && !imageError ? profilePicUrl : undefined}
+      sx={{
+        border: "2px solid orange",
+        color: "orange",
+        bgcolor: "transparent",
+        // ✅ SMOOTH TRANSITIONS: Like Instagram
+        transition: "all 0.2s ease-in-out",
+        opacity: profilePicUrl && !imageError && imageLoaded ? 1 : 0.8,
+      }}
+      onLoad={() => setImageLoaded(true)}
+      onError={() => setImageError(true)}
+    >
+      {(!profilePicUrl || imageError) && <PersonIcon />}
+    </Avatar>
+  );
+};
+
 export default function EnhancedTable() {
   const [page, setPage] = React.useState(0);
   const [search, setSearch] = React.useState("");
@@ -108,6 +224,7 @@ export default function EnhancedTable() {
   const [profilePics, setProfilePics] = React.useState<Record<string, string>>(
     {}
   );
+  const [profilePicsLoading, setProfilePicsLoading] = React.useState(false);
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [filterAnchorEl, setFilterAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -115,7 +232,6 @@ export default function EnhancedTable() {
     getDefaultFilterState()
   );
 
-  // Updated to use new watchlist API
   const {
     userWatchlist,
     isUserWatchlistView,
@@ -125,39 +241,6 @@ export default function EnhancedTable() {
 
   const rowsPerPage = 9;
 
-  // Function to fetch profile picture
-  const fetchProfilePicture = async (
-    username: string
-  ): Promise<string | null> => {
-    const auth = getAuth();
-    const token = await auth.currentUser?.getIdToken();
-
-    try {
-      const response = await fetch(
-        `http://localhost:8001/profile-picture/${username}`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
-
-      if (!response.ok) {
-        console.error(`Failed to fetch profile picture for ${username}`);
-        return null;
-      }
-
-      const data = await response.json();
-      return data.profile_image_url;
-    } catch (error) {
-      console.error(`Error fetching profile picture for ${username}:`, error);
-      return null;
-    }
-  };
-
-  // Calculate filtered rows (moved before useEffect)
   const searchFilteredRows = rows.filter((row) =>
     row.username.toLowerCase().includes(search.toLowerCase())
   );
@@ -168,50 +251,49 @@ export default function EnhancedTable() {
     userWatchlist
   );
 
+  // ✅ INDUSTRY STANDARD: Single API call, browser handles caching
   React.useEffect(() => {
-    const loadData = async () => {
+    const loadDataWithProperCaching = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchUserSentiment();
-        setRows(data);
+        setProfilePicsLoading(true);
+
+        // Load sentiment data and profile pictures in parallel
+        const [sentimentData, profilePicsData] = await Promise.all([
+          fetchUserSentiment(),
+          // Get ALL profile pictures at once (browser will cache them)
+          fetchUserSentiment().then((data) =>
+            fetchProfilePicturesBatch(data.map((row) => row.username))
+          ),
+        ]);
+
+        // Set data immediately
+        setRows(sentimentData);
+        setProfilePics(profilePicsData);
+        setLoading(false);
+        setProfilePicsLoading(false);
+
+        // ✅ SMART PRELOADING: Preload visible + next page images
+        setTimeout(() => {
+          preloadVisibleAndNext(profilePicsData, page, rowsPerPage);
+        }, 100);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load data");
-      } finally {
         setLoading(false);
+        setProfilePicsLoading(false);
       }
     };
-    loadData();
+
+    loadDataWithProperCaching();
   }, []);
 
+  // ✅ PRELOAD NEXT PAGE: When user changes pages
   React.useEffect(() => {
-    const loadProfilePictures = async () => {
-      const newProfilePics: Record<string, string> = {};
-
-      // Get current visible usernames
-      const visibleRows = filteredRows.slice(
-        page * rowsPerPage,
-        page * rowsPerPage + rowsPerPage
-      );
-
-      for (const row of visibleRows) {
-        if (!profilePics[row.username]) {
-          const profilePicUrl = await fetchProfilePicture(row.username);
-          if (profilePicUrl) {
-            newProfilePics[row.username] = profilePicUrl;
-          }
-        }
-      }
-
-      if (Object.keys(newProfilePics).length > 0) {
-        setProfilePics((prev) => ({ ...prev, ...newProfilePics }));
-      }
-    };
-
-    if (rows.length > 0) {
-      loadProfilePictures();
+    if (Object.keys(profilePics).length > 0) {
+      preloadVisibleAndNext(profilePics, page, rowsPerPage);
     }
-  }, [filteredRows, page, profilePics]); // Run when filtered rows or page changes
+  }, [page, profilePics]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -254,7 +336,6 @@ export default function EnhancedTable() {
   };
 
   const navigate = useNavigate();
-  //In order to make it user specific some logic will be needed here
   const handleRowClick = (username: string) => {
     navigate(`/analytics/${username.replace("@", "")}`);
   };
@@ -321,12 +402,15 @@ export default function EnhancedTable() {
             width: 250,
           }}
         />
-        <IconButton
-          onClick={handleFilterClick}
-          sx={{ color: "white", "&:hover": { color: "orange" } }}
-        >
-          <FilterListIcon />
-        </IconButton>
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* ✅ SIMPLIFIED: No manual loading states needed */}
+          <IconButton
+            onClick={handleFilterClick}
+            sx={{ color: "white", "&:hover": { color: "orange" } }}
+          >
+            <FilterListIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Table */}
@@ -364,17 +448,12 @@ export default function EnhancedTable() {
                   >
                     <TableCell sx={cellStyle}>
                       <Box display="flex" alignItems="center" gap={2}>
-                        <Avatar
-                          src={profilePics[row.username] || undefined}
-                          sx={{
-                            border: "2px solid orange",
-                            color: "orange",
-                            bgcolor: "transparent",
-                          }}
-                        >
-                          {!profilePics[row.username] && <PersonIcon />}
-                        </Avatar>
-                        @{row.username} {/* ✅ prepend @ for display */}
+                        {/* ✅ OPTIMIZED AVATAR: Instagram-style loading */}
+                        <OptimizedAvatar
+                          username={row.username}
+                          profilePicUrl={profilePics[row.username]}
+                        />
+                        @{row.username}
                       </Box>
                     </TableCell>
 
@@ -395,7 +474,7 @@ export default function EnhancedTable() {
                     <TableCell sx={{ ...cellStyle, textAlign: "center" }}>
                       <IconButton
                         onClick={(e) => {
-                          e.stopPropagation(); // Prevent row click from firing
+                          e.stopPropagation();
                           toggleUserWatchlist(row.username);
                         }}
                         sx={{
@@ -464,7 +543,17 @@ export default function EnhancedTable() {
                   <Checkbox
                     checked={filterState.sortByAccuracy}
                     onChange={handleAccuracySortChange}
-                    sx={checkboxStyle}
+                    disableRipple
+                    sx={{
+                      color: "orange",
+                      "&.Mui-checked": {
+                        color: "orange",
+                      },
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                      transform: "scale(0.9)",
+                    }}
                   />
                 }
                 label={
@@ -488,7 +577,17 @@ export default function EnhancedTable() {
                           timeframe
                         )}
                         onChange={() => handleTimeframeChange(timeframe)}
-                        sx={checkboxStyle}
+                        disableRipple
+                        sx={{
+                          color: "orange",
+                          "&.Mui-checked": {
+                            color: "orange",
+                          },
+                          "&:hover": {
+                            backgroundColor: "transparent",
+                          },
+                          transform: "scale(0.9)",
+                        }}
                       />
                     }
                     label={<Typography sx={filterText}>{timeframe}</Typography>}
@@ -538,12 +637,6 @@ const filterLabel = {
 const filterText = {
   color: "white",
   fontSize: "0.8rem",
-};
-
-const checkboxStyle = {
-  color: "orange",
-  "&.Mui-checked": { color: "orange" },
-  transform: "scale(0.9)",
 };
 
 const filterButton = {

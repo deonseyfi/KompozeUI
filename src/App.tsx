@@ -15,6 +15,11 @@ const theme = createTheme({
   typography: {
     fontFamily: `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
   },
+  palette: {
+    primary: {
+      main: "#ffa500", // Orange hex value instead of "orange"
+    },
+  },
 });
 
 function App() {
