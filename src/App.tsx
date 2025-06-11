@@ -4,7 +4,6 @@ import Landing from "./pages/Landing";
 import Discover from "./pages/Discover";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
-import APIPlatform from "./pages/APIPlatform";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
 import { AuthProvider } from "./ProfilePage/Components/BackendAuthContext";
@@ -13,7 +12,8 @@ import "./App.css";
 
 const theme = createTheme({
   typography: {
-    fontFamily: `Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif`,
+    fontFamily:
+      '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif',
   },
   palette: {
     primary: {
@@ -21,7 +21,6 @@ const theme = createTheme({
     },
   },
 });
-
 function App() {
   return (
     <ThemeProvider theme={theme}>
@@ -29,7 +28,7 @@ function App() {
         <WatchlistProvider>
           <Router>
             <Routes>
-              {/* 🔹 Landing with isolated layout */}
+              {/* :small_blue_diamond: Landing with isolated layout */}
               <Route
                 path="/landing"
                 element={
@@ -38,8 +37,7 @@ function App() {
                   </LandingLayout>
                 }
               />
-
-              {/* 🔸 All other pages with navbar + padding */}
+              {/* :small_orange_diamond: All other pages with navbar + padding */}
               <Route
                 path="/"
                 element={
@@ -49,7 +47,7 @@ function App() {
                 }
               />
               <Route
-                path="/analytics/:username"
+                path="/analytics"
                 element={
                   <MainLayout>
                     <Analytics />
@@ -64,14 +62,6 @@ function App() {
                   </MainLayout>
                 }
               />
-              <Route
-                path="/api-platform"
-                element={
-                  <MainLayout>
-                    <APIPlatform />
-                  </MainLayout>
-                }
-              />
             </Routes>
           </Router>
         </WatchlistProvider>
@@ -79,5 +69,4 @@ function App() {
     </ThemeProvider>
   );
 }
-
 export default App;
