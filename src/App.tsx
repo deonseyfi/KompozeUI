@@ -4,7 +4,7 @@ import Landing from "./pages/Landing";
 import Discover from "./pages/Discover";
 import Analytics from "./pages/Analytics";
 import About from "./pages/About";
-import APIPlatform from "./pages/APIPlatform";
+import AskZ31 from "./pages/AskZ31";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
 import { AuthProvider } from "./ProfilePage/Components/BackendAuthContext";
@@ -60,11 +60,11 @@ function App() {
                 }
               />
               <Route
-                path="/api-platform"
+                path="/ask-z31"
                 element={
-                  <MainLayout>
-                    <APIPlatform />
-                  </MainLayout>
+                  
+                    <AskZ31/>
+                  
                 }
               />
             </Routes>

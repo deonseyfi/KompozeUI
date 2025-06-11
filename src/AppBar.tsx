@@ -17,12 +17,13 @@ import WebLogo from "./newlogo4.png";
 import { useAuth } from "./ProfilePage/Components/BackendAuthContext";
 import LoginModal from "./ProfilePage/Components/LoginModal";
 import { useWatchlist } from "./DiscoverPage/WatchlistFunctionality";
+import CryptoTickerBar from "./ProfilePage/Components/CryptoTicker";
 import GlassmorphismAccountPopup from "./DiscoverPage/GlassmorphismAccountPopup";
 
 const pages = [
   { label: "Discover", path: "/" },
   { label: "About Us", path: "/about" },
-  { label: "API Platform", path: "/api-platform" },
+  { label: "Ask Z31", path: "/ask-z31" },
 ];
 
 function ResponsiveAppBar() {
@@ -68,6 +69,9 @@ function ResponsiveAppBar() {
 
   return (
     <>
+      {/* CryptoTicker at the very top */}
+      <CryptoTickerBar />
+
       <AppBar
         position="sticky"
         sx={{
