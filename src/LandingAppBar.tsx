@@ -20,7 +20,7 @@ const pages = [
   { label: "Discover", path: "/" },
   { label: "Analytics", path: "/analytics" },
   { label: "About Us", path: "/about" },
-  { label: "API Platform", path: "/api-platform" },
+  { label: "Ask Z31", path: "/ask-z31" },
 ];
 
 function LandingAppBar() {
