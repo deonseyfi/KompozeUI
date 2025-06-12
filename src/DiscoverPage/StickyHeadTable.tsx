@@ -43,14 +43,14 @@ export interface RowData {
   accuracy: number;
 }
 
-export const formatTimeFrame = (days: number): string => {
+const formatTimeFrame = (days: number): string => {
   if (days <= 1) return "Day Trader";
   if (days <= 7) return "Swing Trader";
   if (days <= 30) return "Position Trader";
   return "Macro Trader";
 };
 
-export const formatDate = (dateStr: string): string => {
+const formatDate = (dateStr: string): string => {
   const date = new Date(dateStr);
   return date.toLocaleDateString("en-US", {
     year: "numeric",
@@ -140,7 +140,7 @@ const fetchProfilePicturesBatch = async (
 };
 
 // ✅ INSTAGRAM TECHNIQUE: Preload images for instant display
-export const preloadImage = (url: string) => {
+const preloadImage = (url: string) => {
   const img = new Image();
   img.onload = () => {
     console.log(`✅ Preloaded: ${url.split("/").pop()}`);
@@ -167,7 +167,7 @@ const preloadVisibleAndNext = (
     });
 };
 
-export const getAccuracyColor = (value: number) => {
+const getAccuracyColor = (value: number) => {
   if (value >= 90) return "#3AFF00";
   if (value >= 80) return "#00FFFF";
   if (value >= 70) return "#E8FF00";
@@ -180,12 +180,11 @@ export const getAccuracyColor = (value: number) => {
   return "#FF0000";
 };
 
-export const OptimizedAvatar: React.FC<{
+// ✅ OPTIMIZED AVATAR: Better loading states and error handling
+const OptimizedAvatar: React.FC<{
   username: string;
   profilePicUrl?: string;
-  size?: number; // Made optional with default
-}> = ({ username, profilePicUrl, size = 56 }) => {
-  // Added size to destructuring with default
+}> = ({ username, profilePicUrl }) => {
   const [imageLoaded, setImageLoaded] = React.useState(false);
   const [imageError, setImageError] = React.useState(false);
 
@@ -201,15 +200,12 @@ export const OptimizedAvatar: React.FC<{
     <Avatar
       src={profilePicUrl && !imageError ? profilePicUrl : undefined}
       sx={{
-        width: size, // Use the size prop
-        height: size, // Use the size prop
-        border: "2px solid #ff6b35",
-        color: "#ff6b35",
+        border: "2px solid orange",
+        color: "orange",
         bgcolor: "transparent",
         // ✅ SMOOTH TRANSITIONS: Like Instagram
         transition: "all 0.2s ease-in-out",
         opacity: profilePicUrl && !imageError && imageLoaded ? 1 : 0.8,
-        fontSize: size * 0.4, // Scale icon size with avatar size
       }}
       onLoad={() => setImageLoaded(true)}
       onError={() => setImageError(true)}
@@ -355,7 +351,7 @@ export default function EnhancedTable() {
           alignItems: "center",
         }}
       >
-        <CircularProgress sx={{ color: "#ff6b35" }} />
+        <CircularProgress sx={{ color: "orange" }} />
         <Typography sx={{ color: "white", ml: 2 }}>
           Loading sentiment data...
         </Typography>
@@ -374,7 +370,7 @@ export default function EnhancedTable() {
           alignItems: "center",
         }}
       >
-        <Typography sx={{ color: "#ff6b35" }}>Error: {error}</Typography>
+        <Typography sx={{ color: "red" }}>Error: {error}</Typography>
       </Box>
     );
   }
@@ -397,9 +393,9 @@ export default function EnhancedTable() {
           sx={{
             input: { color: "white" },
             "& .MuiOutlinedInput-root": {
-              "& fieldset": { borderColor: "#ff6b35" },
-              "&:hover fieldset": { borderColor: "#ff6b35" },
-              "&.Mui-focused fieldset": { borderColor: "#ff6b35" },
+              "& fieldset": { borderColor: "orange" },
+              "&:hover fieldset": { borderColor: "orange" },
+              "&.Mui-focused fieldset": { borderColor: "orange" },
             },
             backgroundColor: "#111",
             borderRadius: 2,
@@ -410,7 +406,7 @@ export default function EnhancedTable() {
           {/* ✅ SIMPLIFIED: No manual loading states needed */}
           <IconButton
             onClick={handleFilterClick}
-            sx={{ color: "white", "&:hover": { color: "#ff6b35" } }}
+            sx={{ color: "white", "&:hover": { color: "orange" } }}
           >
             <FilterListIcon />
           </IconButton>
@@ -444,7 +440,7 @@ export default function EnhancedTable() {
                     sx={{
                       cursor: "pointer",
                       "&:hover": {
-                        backgroundColor: "rgba(255, 107, 53, 0.12) !important",
+                        backgroundColor: "rgba(255, 140, 0, 0.12) !important",
                       },
                       transition: "background-color 0.3s ease",
                     }}
@@ -456,7 +452,6 @@ export default function EnhancedTable() {
                         <OptimizedAvatar
                           username={row.username}
                           profilePicUrl={profilePics[row.username]}
-                          size={40} // Changed from 64 to 40 for smaller table rows
                         />
                         @{row.username}
                       </Box>
@@ -484,7 +479,7 @@ export default function EnhancedTable() {
                         }}
                         sx={{
                           color: isInUserWatchlist(row.username)
-                            ? "#ff6b35"
+                            ? "orange"
                             : "#666",
                         }}
                       >
@@ -508,7 +503,7 @@ export default function EnhancedTable() {
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
-            sx={{ color: "white", ".MuiButtonBase-root": { color: "#ff6b35" } }}
+            sx={{ color: "white", ".MuiButtonBase-root": { color: "orange" } }}
           />
         </Box>
       </Paper>
@@ -550,9 +545,9 @@ export default function EnhancedTable() {
                     onChange={handleAccuracySortChange}
                     disableRipple
                     sx={{
-                      color: "#ff6b35",
+                      color: "orange",
                       "&.Mui-checked": {
-                        color: "#ff6b35",
+                        color: "orange",
                       },
                       "&:hover": {
                         backgroundColor: "transparent",
@@ -584,9 +579,9 @@ export default function EnhancedTable() {
                         onChange={() => handleTimeframeChange(timeframe)}
                         disableRipple
                         sx={{
-                          color: "#ff6b35",
+                          color: "orange",
                           "&.Mui-checked": {
-                            color: "#ff6b35",
+                            color: "orange",
                           },
                           "&:hover": {
                             backgroundColor: "transparent",
@@ -633,7 +628,7 @@ const cellStyle = {
 };
 
 const filterLabel = {
-  color: "#ff6b35",
+  color: "orange",
   mb: 1.5,
   fontWeight: "bold",
   fontSize: "0.9rem",
@@ -651,15 +646,15 @@ const filterButton = {
   px: 1.5,
   py: 0.5,
   fontSize: "0.7rem",
-  "&:hover": { borderColor: "#ff6b35", color: "#ff6b35" },
+  "&:hover": { borderColor: "orange", color: "orange" },
 };
 
 const applyButton = {
   color: "white",
-  border: "1px solid #ff6b35",
+  border: "1px solid orange",
   borderRadius: 1,
   px: 1.5,
   py: 0.5,
   fontSize: "0.7rem",
-  "&:hover": { backgroundColor: "#ff6b35", color: "black" },
+  "&:hover": { backgroundColor: "orange", color: "black" },
 };
