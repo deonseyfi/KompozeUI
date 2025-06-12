@@ -1,4 +1,4 @@
-import { RowData } from "./StickyHeadTable";
+import { RowData } from "../StickyHeadTable";
 export interface FilterState {
   sortByAccuracy: boolean;
   selectedTimeframes: string[];
