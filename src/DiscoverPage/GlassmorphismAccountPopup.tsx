@@ -137,7 +137,7 @@ const GlassmorphismAccountPopup: React.FC<GlassmorphismAccountPopupProps> = ({
               width: "64px",
               height: "64px",
               borderRadius: "50%",
-              background: "linear-gradient(135deg, orange, #FF8C00)",
+              background: "linear-gradient(135deg, #ff6b35, #FF8C00)",
               margin: "0 auto 16px",
               display: "flex",
               alignItems: "center",
@@ -197,7 +197,7 @@ const GlassmorphismAccountPopup: React.FC<GlassmorphismAccountPopupProps> = ({
                   background: "rgba(255, 255, 255, 0.08)",
                   color: "#FFFFFF",
                   "& .MuiSvgIcon-root": {
-                    color: "orange",
+                    color: "#ff6b35",
                   },
                 },
                 "&:last-child": {
@@ -206,7 +206,7 @@ const GlassmorphismAccountPopup: React.FC<GlassmorphismAccountPopupProps> = ({
                   color: "rgba(255, 107, 107, 0.9)",
                   "&:hover": {
                     background: "rgba(255, 140, 0, 0.12) !important",
-                    color: "orange",
+                    color: "#ff6b35",
                   },
                 },
               }}

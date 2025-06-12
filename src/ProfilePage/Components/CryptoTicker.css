@@ -1,15 +1,16 @@
 .ticker-bar {
   background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-  border-bottom: 1px solid rgba(255, 165, 0, 0.3);
+  border-bottom: 1px #ff6b35;
   height: 40px;
   width: 100%;
   position: relative;
   top: 0;
   left: 0;
-  z-index: 1000;
+  z-index: 10;
   overflow: hidden;
   padding-top: 10px;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
@@ -64,7 +65,8 @@
   color: #ff4757;
 }
 
-.loading-text, .error-text {
+.loading-text,
+.error-text {
   color: #888;
   font-size: 13px;
   margin-left: 20px;
@@ -88,7 +90,7 @@
   .ticker-bar {
     height: 35px;
   }
-  
+
   .ticker-item {
     margin-right: 20px;
     font-size: 12px;
@@ -98,11 +100,11 @@
   .crypto-symbol {
     min-width: 35px;
   }
-  
+
   .crypto-price {
     min-width: 60px;
   }
-  
+
   .crypto-change {
     min-width: 50px;
   }

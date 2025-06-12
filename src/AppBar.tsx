@@ -17,11 +17,13 @@ import WebLogo from "./newlogo4.png";
 import { useAuth } from "./ProfilePage/Components/BackendAuthContext";
 import LoginModal from "./ProfilePage/Components/LoginModal";
 import { useWatchlist } from "./DiscoverPage/WatchlistFunctionality";
+import CryptoTickerBar from "./ProfilePage/Components/CryptoTicker";
 import GlassmorphismAccountPopup from "./DiscoverPage/GlassmorphismAccountPopup";
 
 const pages = [
   { label: "Discover", path: "/" },
   { label: "About Us", path: "/about" },
+  { label: "Ask Z31", path: "/ask-z31" },
 ];
 
 function ResponsiveAppBar() {
@@ -67,6 +69,9 @@ function ResponsiveAppBar() {
 
   return (
     <>
+      {/* CryptoTicker at the very top */}
+      <CryptoTickerBar />
+
       <AppBar
         position="sticky"
         sx={{
@@ -127,13 +132,13 @@ function ResponsiveAppBar() {
                     textTransform: "none",
                     fontWeight: 600,
                     "&.active": {
-                      color: "orange",
-                      borderBottom: "2px solid orange",
+                      color: "#ff6b35",
+                      borderBottom: "2px solid #ff6b35",
                       borderRadius: 0,
                     },
                     "&:hover": {
                       backgroundColor: "transparent",
-                      color: "orange",
+                      color: "#ff6b35",
                     },
                   }}
                 >
@@ -154,11 +159,11 @@ function ResponsiveAppBar() {
                 startIcon={<StarIcon />}
                 onClick={toggleUserWatchlistView}
                 sx={{
-                  color: isUserWatchlistView ? "orange" : "white",
+                  color: isUserWatchlistView ? "#ff6b35" : "white",
                   textTransform: "none",
                   fontWeight: 600,
                   "&:hover": {
-                    color: "orange",
+                    color: "#ff6b35",
                     backgroundColor: "transparent",
                   },
                 }}
@@ -172,7 +177,7 @@ function ResponsiveAppBar() {
                     Welcome, {user?.name || user?.email}
                   </Typography>
                   <IconButton onClick={handleOpenUserMenu} sx={{ ml: 1 }}>
-                    <PersonIcon sx={{ color: "orange", fontSize: 28 }} />
+                    <PersonIcon sx={{ color: "#ff6b35", fontSize: 28 }} />
                   </IconButton>
                 </>
               ) : (
@@ -182,20 +187,20 @@ function ResponsiveAppBar() {
                     onClick={handleLoginClick}
                     sx={{
                       color: "white",
-                      borderColor: "orange",
+                      borderColor: "#ff6b35",
                       textTransform: "none",
                       ml: 2,
                       "&:hover": {
                         color: "black",
-                        backgroundColor: "orange",
-                        borderColor: "orange",
+                        backgroundColor: "#ff6b35",
+                        borderColor: "#ff6b35",
                       },
                     }}
                   >
                     Login
                   </Button>
                   <IconButton sx={{ ml: 2 }}>
-                    <PersonIcon sx={{ color: "orange", fontSize: 28 }} />
+                    <PersonIcon sx={{ color: "#ff6b35", fontSize: 28 }} />
                   </IconButton>
                 </>
               )}
@@ -234,7 +239,7 @@ function ResponsiveAppBar() {
                         to={page.path}
                         style={({ isActive }) => ({
                           textDecoration: "none",
-                          color: isActive ? "orange" : "white",
+                          color: isActive ? "#ff6b35" : "white",
                           fontWeight: 600,
                           width: "100%",
                         })}
@@ -296,13 +301,13 @@ function ResponsiveAppBar() {
                   sx={{
                     display: { xs: "flex", md: "none" },
                     color: "white",
-                    borderColor: "orange",
+                    borderColor: "#ff6b35",
                     textTransform: "none",
                     fontSize: "0.75rem",
                     "&:hover": {
                       color: "black",
-                      backgroundColor: "orange",
-                      borderColor: "orange",
+                      backgroundColor: "#ff6b35",
+                      borderColor: "#ff6b35",
                     },
                   }}
                 >
@@ -321,7 +326,7 @@ function ResponsiveAppBar() {
                     {user?.name?.split(" ")[0] || user?.email?.split("@")[0]}
                   </Typography>
                   <IconButton onClick={handleOpenUserMenu} size="small">
-                    <PersonIcon sx={{ color: "orange", fontSize: 20 }} />
+                    <PersonIcon sx={{ color: "#ff6b35", fontSize: 20 }} />
                   </IconButton>
                 </Box>
               )}

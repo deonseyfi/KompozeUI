@@ -23,6 +23,7 @@
     "firebase": "^11.9.0",
     "gsap": "^3.13.0",
     "lightweight-charts": "^5.0.7",
+    "lucide-react": "^0.513.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0",

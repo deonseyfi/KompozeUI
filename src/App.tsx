@@ -5,6 +5,7 @@ import Discover from "./pages/Discover";
 import Analytics from "./pages/Analytics";
 import Dashboard from "./ProfilePage/Page/Dashboard"; // Add this import
 import About from "./pages/About";
+import AskZ31 from "./pages/AskZ31";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
 import { AuthProvider } from "./ProfilePage/Components/BackendAuthContext";
@@ -18,7 +19,7 @@ const theme = createTheme({
   },
   palette: {
     primary: {
-      main: "#ffa500", // Orange hex value instead of "orange"
+      main: "#ff6b35", // Orange hex value instead of "orange"
     },
   },
 });
@@ -73,6 +74,14 @@ function App() {
                   <MainLayout>
                     <About />
                   </MainLayout>
+                }
+              />
+              <Route
+                path="/ask-z31"
+                element={
+                  
+                    <AskZ31/>
+                  
                 }
               />
             </Routes>
