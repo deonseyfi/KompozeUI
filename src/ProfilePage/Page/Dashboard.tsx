@@ -3,7 +3,6 @@ import {
   Container,
   Box,
   Typography,
-  Paper,
   CircularProgress,
   Chip,
   Fade,
@@ -12,8 +11,6 @@ import {
   alpha,
 } from "@mui/material";
 import {
-  TrendingUp,
-  TrendingDown,
   ShowChart,
   Timeline,
   Assessment,
@@ -25,6 +22,8 @@ import SearchAccounts from "../Components/SearchAccounts";
 import TradingChart from "../Components/TradingChart";
 import TweetTable, { TweetRecord } from "../Components/TweetTable";
 import { getCoinIcon } from "../Components/Icons";
+import GlowingPaper from "../Components/GlowingPaper";
+import AnimatedStat from "../Components/AnimatedStat";
 import { useUserSentiment } from "../apidata/UserProfilePageData";
 import { useCryptoPrice } from "../apidata/CrytpoData";
 import { useParams } from "react-router-dom";
@@ -45,95 +44,6 @@ const COINS: Coin[] = [
   { symbol: "DOGE", imageUrl: getCoinIcon("doge") },
   { symbol: "LINK", imageUrl: getCoinIcon("link") },
 ];
-
-// Custom styled components
-const GlowingPaper = ({ children, sx = {}, ...props }: any) => (
-  <Paper
-    sx={{
-      background: "linear-gradient(145deg, #1a1a1a 0%, #0d0d0d 100%)",
-      border: "1px solid",
-      borderColor: alpha("#ff6b35", 0.3),
-      borderRadius: 3,
-      position: "relative",
-      overflow: "hidden",
-      transition: "all 0.3s ease",
-      "&:hover": {
-        borderColor: alpha("#ff6b35", 0.5),
-        transform: "translateY(-2px)",
-        boxShadow: `0 8px 32px ${alpha("#ff6b35", 0.2)}`,
-      },
-      "&::before": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: "1px",
-        background: "linear-gradient(90deg, transparent, #ff6b35, transparent)",
-        opacity: 0.5,
-      },
-      ...sx,
-    }}
-    {...props}
-  >
-    {children}
-  </Paper>
-);
-
-const AnimatedStat = ({ label, value, icon, trend }: any) => (
-  <Box
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      gap: 1,
-      p: 2,
-      borderRadius: 2,
-      background: alpha("#ff6b35", 0.05),
-      border: `1px solid ${alpha("#ff6b35", 0.2)}`,
-      transition: "all 0.3s ease",
-      "&:hover": {
-        background: alpha("#ff6b35", 0.1),
-        transform: "scale(1.02)",
-      },
-    }}
-  >
-    <Box display="flex" alignItems="center" gap={1}>
-      {icon}
-      <Typography sx={{ color: "#888", fontSize: "0.85rem" }}>
-        {label}
-      </Typography>
-    </Box>
-    <Box display="flex" alignItems="baseline" gap={1}>
-      <Typography
-        sx={{
-          color: "white",
-          fontSize: "1.5rem",
-          fontWeight: "bold",
-          fontFamily: "monospace",
-        }}
-      >
-        {value}
-      </Typography>
-      {trend && (
-        <Chip
-          size="small"
-          icon={trend > 0 ? <TrendingUp /> : <TrendingDown />}
-          label={`${trend > 0 ? "+" : ""}${trend}%`}
-          sx={{
-            backgroundColor:
-              trend > 0 ? alpha("#4caf50", 0.2) : alpha("#f44336", 0.2),
-            color: trend > 0 ? "#4caf50" : "#f44336",
-            border: `1px solid ${trend > 0 ? "#4caf50" : "#f44336"}`,
-            "& .MuiChip-icon": {
-              color: "inherit",
-              fontSize: "0.9rem",
-            },
-          }}
-        />
-      )}
-    </Box>
-  </Box>
-);
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
@@ -425,7 +335,7 @@ const Dashboard: React.FC = () => {
               label="Current Price"
               value={`$${latestPrice.toFixed(2)}`}
               icon={<ShowChart sx={{ color: "#ff6b35" }} />}
-              trend={priceChange.toFixed(2)}
+              trend={Number(priceChange.toFixed(2))}
             />
             <AnimatedStat
               label="24h Volume"
@@ -746,22 +656,22 @@ const Dashboard: React.FC = () => {
 export default Dashboard;
 
 /** Returns true if every `time` value is unique */
-export function areTimesUnique(data: CandlestickData[]): boolean {
-  const seen = new Set<Object>();
-  for (const { time } of data) {
-    if (seen.has(time)) return false;
-    seen.add(time);
-  }
-  return true;
-}
+// export function areTimesUnique(data: CandlestickData[]): boolean {
+//   const seen = new Set<Object>();
+//   for (const { time } of data) {
+//     if (seen.has(time)) return false;
+//     seen.add(time);
+//   }
+//   return true;
+// }
 
-/** Returns an array of duplicate timestamps (empty if none) */
-export function findDuplicateTimes(data: CandlestickData[]): Object[] {
-  const seen = new Set<Object>();
-  const dupes: Object[] = [];
-  for (const { time } of data) {
-    if (seen.has(time)) dupes.push(time);
-    else seen.add(time);
-  }
-  return Array.from(new Set(dupes));
-}
+// /** Returns an array of duplicate timestamps (empty if none) */
+// export function findDuplicateTimes(data: CandlestickData[]): Object[] {
+//   const seen = new Set<Object>();
+//   const dupes: Object[] = [];
+//   for (const { time } of data) {
+//     if (seen.has(time)) dupes.push(time);
+//     else seen.add(time);
+//   }
+//   return Array.from(new Set(dupes));
+// }
