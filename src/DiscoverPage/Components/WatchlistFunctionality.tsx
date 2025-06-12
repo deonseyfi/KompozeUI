@@ -5,7 +5,7 @@ import {
   useEffect,
   ReactNode,
 } from "react";
-import { useAuth } from "../ProfilePage/Components/BackendAuthContext"; // Fixed import path
+import { useAuth } from "../../ProfilePage/Components/BackendAuthContext"; // Fixed import path
 
 // Types
 export interface WatchlistItem {

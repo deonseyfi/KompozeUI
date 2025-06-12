@@ -14,7 +14,6 @@ import {
   TableHead,
   TablePagination,
   TableRow,
-  TextField,
   Typography,
   FormControl,
   FormLabel,
@@ -33,8 +32,12 @@ import {
   applyFilters,
   FilterState,
   getDefaultFilterState,
-} from "./FilterFunctionality";
-import { useWatchlist, filterUsersByWatchlist } from "./WatchlistFunctionality";
+} from "./Components/FilterFunctionality";
+import {
+  useWatchlist,
+  filterUsersByWatchlist,
+} from "./Components/WatchlistFunctionality";
+import SearchBar, { RowData as SearchBarRowData } from "./Components/SearchBar"; // Import the new SearchBar component
 
 export interface RowData {
   username: string;
@@ -65,7 +68,10 @@ async function fetchUserSentiment(): Promise<RowData[]> {
   try {
     const response = await fetch("http://localhost:8001/usersentiment", {
       method: "GET",
-      headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const apiData = await response.json();
@@ -98,8 +104,10 @@ const getAccuracyColor = (value: number) => {
 
 export default function EnhancedTable() {
   const [page, setPage] = React.useState(0);
-  const [search, setSearch] = React.useState("");
   const [rows, setRows] = React.useState<RowData[]>([]);
+  const [searchFilteredRows, setSearchFilteredRows] = React.useState<RowData[]>(
+    []
+  );
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [filterOpen, setFilterOpen] = React.useState(false);
@@ -126,6 +134,7 @@ export default function EnhancedTable() {
         setError(null);
         const data = await fetchUserSentiment();
         setRows(data);
+        setSearchFilteredRows(data); // Initialize search filtered rows
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load data");
       } finally {
@@ -175,9 +184,12 @@ export default function EnhancedTable() {
     setFilterState(getDefaultFilterState());
   };
 
-  const searchFilteredRows = rows.filter((row) =>
-    row.username.toLowerCase().includes(search.toLowerCase())
-  );
+  // Handler for search results from SearchBar
+  const handleSearchResults = React.useCallback((filteredData: RowData[]) => {
+    setSearchFilteredRows(filteredData);
+    setPage(0); // Reset to first page when search changes
+  }, []);
+
   const sortedAndFilteredRows = applyFilters(searchFilteredRows, filterState);
   const filteredRows = filterUsersByWatchlist(
     sortedAndFilteredRows,
@@ -235,23 +247,11 @@ export default function EnhancedTable() {
         alignItems="center"
         mb={2}
       >
-        <TextField
+        <SearchBar
+          data={rows}
+          onFilteredResults={handleSearchResults}
           placeholder="Search Account"
-          variant="outlined"
-          size="small"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          sx={{
-            input: { color: "white" },
-            "& .MuiOutlinedInput-root": {
-              "& fieldset": { borderColor: "orange" },
-              "&:hover fieldset": { borderColor: "orange" },
-              "&.Mui-focused fieldset": { borderColor: "orange" },
-            },
-            backgroundColor: "#111",
-            borderRadius: 2,
-            width: 250,
-          }}
+          width={250}
         />
         <IconButton
           onClick={handleFilterClick}

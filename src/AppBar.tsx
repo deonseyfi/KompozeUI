@@ -16,7 +16,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import WebLogo from "./newlogo4.png";
 import { useAuth } from "./ProfilePage/Components/BackendAuthContext";
 import LoginModal from "./ProfilePage/Components/LoginModal";
-import { useWatchlist } from "./DiscoverPage/WatchlistFunctionality";
+import { useWatchlist } from "./DiscoverPage/Components/WatchlistFunctionality";
 import CryptoTickerBar from "./ProfilePage/Components/CryptoTicker";
 import GlassmorphismAccountPopup from "./DiscoverPage/GlassmorphismAccountPopup";
 

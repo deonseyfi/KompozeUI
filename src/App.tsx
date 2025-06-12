@@ -8,7 +8,7 @@ import AskZ31 from "./pages/AskZ31";
 import MainLayout from "./pages/MainLayout";
 import LandingLayout from "./pages/LandingLayout";
 import { AuthProvider } from "./ProfilePage/Components/BackendAuthContext";
-import { WatchlistProvider } from "./DiscoverPage/WatchlistFunctionality";
+import { WatchlistProvider } from "./DiscoverPage/Components/WatchlistFunctionality";
 import "./App.css";
 
 const theme = createTheme({
@@ -59,14 +59,7 @@ function App() {
                   </MainLayout>
                 }
               />
-              <Route
-                path="/ask-z31"
-                element={
-                  
-                    <AskZ31/>
-                  
-                }
-              />
+              <Route path="/ask-z31" element={<AskZ31 />} />
             </Routes>
           </Router>
         </WatchlistProvider>
