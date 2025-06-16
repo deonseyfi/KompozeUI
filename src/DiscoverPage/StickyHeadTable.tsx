@@ -38,6 +38,9 @@ import {
   filterUsersByWatchlist,
 } from "./Components/WatchlistFunctionality";
 import SearchBar, { RowData as SearchBarRowData } from "./Components/SearchBar"; // Import the new SearchBar component
+import { fetchProfilePicturesBatch, preloadVisibleAndNext } from "./apidata/ProfilePicturesFetch";
+import { OptimizedAvatar } from "./Components/OptimizedAvitar";
+
 
 export interface RowData {
   username: string;
@@ -110,6 +113,10 @@ export default function EnhancedTable() {
   );
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [profilePics, setProfilePics] = React.useState<Record<string, string>>(
+    {}
+  );
+  const [profilePicsLoading, setProfilePicsLoading] = React.useState(false);
   const [filterOpen, setFilterOpen] = React.useState(false);
   const [filterAnchorEl, setFilterAnchorEl] =
     React.useState<null | HTMLElement>(null);
@@ -126,23 +133,53 @@ export default function EnhancedTable() {
   } = useWatchlist();
 
   const rowsPerPage = 9;
+  
 
   React.useEffect(() => {
-    const loadData = async () => {
+    const loadDataWithProperCaching = async () => {
       try {
         setLoading(true);
         setError(null);
-        const data = await fetchUserSentiment();
-        setRows(data);
-        setSearchFilteredRows(data); // Initialize search filtered rows
+        setProfilePicsLoading(true);
+
+
+        // Load sentiment data and profile pictures in parallel
+        const [sentimentData, profilePicsData] = await Promise.all([
+          fetchUserSentiment(),
+          // Get ALL profile pictures at once (browser will cache them)
+          fetchUserSentiment().then((data) =>
+            fetchProfilePicturesBatch(data.map((row) => row.username))
+          ),
+        ]);
+
+
+        // Set data immediately
+        setRows(sentimentData);
+        setProfilePics(profilePicsData);
+        setLoading(false);
+        setProfilePicsLoading(false);
+
+        // ✅ SMART PRELOADING: Preload visible + next page images
+        setTimeout(() => {
+          preloadVisibleAndNext(profilePicsData, page, rowsPerPage);
+        }, 100);
+
+        setSearchFilteredRows(sentimentData); // Initialize search filtered rows
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to load data");
-      } finally {
         setLoading(false);
+        setProfilePicsLoading(false);
       }
     };
-    loadData();
+    loadDataWithProperCaching();
   }, []);
+
+    // ✅ PRELOAD NEXT PAGE: When user changes pages
+    React.useEffect(() => {
+      if (Object.keys(profilePics).length > 0) {
+        preloadVisibleAndNext(profilePics, page, rowsPerPage);
+      }
+    }, [page, profilePics]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -253,12 +290,15 @@ export default function EnhancedTable() {
           placeholder="Search Account"
           width={250}
         />
-        <IconButton
-          onClick={handleFilterClick}
-          sx={{ color: "white", "&:hover": { color: "orange" } }}
-        >
-          <FilterListIcon />
-        </IconButton>
+        <Box display="flex" alignItems="center" gap={2}>
+          {/* ✅ SIMPLIFIED: No manual loading states needed */}
+          <IconButton
+            onClick={handleFilterClick}
+            sx={{ color: "white", "&:hover": { color: "orange" } }}
+          >
+            <FilterListIcon />
+          </IconButton>
+        </Box>
       </Box>
 
       {/* Table */}
@@ -296,16 +336,12 @@ export default function EnhancedTable() {
                   >
                     <TableCell sx={cellStyle}>
                       <Box display="flex" alignItems="center" gap={2}>
-                        <Avatar
-                          sx={{
-                            border: "2px solid orange",
-                            color: "orange",
-                            bgcolor: "transparent",
-                          }}
-                        >
-                          <PersonIcon />
-                        </Avatar>
-                        @{row.username} {/* ✅ prepend @ for display */}
+                      {/* ✅ OPTIMIZED AVATAR: Instagram-style loading */}
+                      <OptimizedAvatar
+                          username={row.username}
+                          profilePicUrl={profilePics[row.username]}
+                        />
+                        @{row.username}
                       </Box>
                     </TableCell>
 
@@ -395,7 +431,17 @@ export default function EnhancedTable() {
                   <Checkbox
                     checked={filterState.sortByAccuracy}
                     onChange={handleAccuracySortChange}
-                    sx={checkboxStyle}
+                    disableRipple
+                    sx={{
+                      color: "orange",
+                      "&.Mui-checked": {
+                        color: "orange",
+                      },
+                      "&:hover": {
+                        backgroundColor: "transparent",
+                      },
+                      transform: "scale(0.9)",
+                    }}
                   />
                 }
                 label={
@@ -419,7 +465,17 @@ export default function EnhancedTable() {
                           timeframe
                         )}
                         onChange={() => handleTimeframeChange(timeframe)}
-                        sx={checkboxStyle}
+                        disableRipple
+                        sx={{
+                          color: "orange",
+                          "&.Mui-checked": {
+                            color: "orange",
+                          },
+                          "&:hover": {
+                            backgroundColor: "transparent",
+                          },
+                          transform: "scale(0.9)",
+                        }}
                       />
                     }
                     label={<Typography sx={filterText}>{timeframe}</Typography>}
@@ -469,12 +525,6 @@ const filterLabel = {
 const filterText = {
   color: "white",
   fontSize: "0.8rem",
-};
-
-const checkboxStyle = {
-  color: "orange",
-  "&.Mui-checked": { color: "orange" },
-  transform: "scale(0.9)",
 };
 
 const filterButton = {
