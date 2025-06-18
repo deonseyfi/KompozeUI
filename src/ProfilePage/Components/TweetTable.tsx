@@ -15,12 +15,21 @@ import {
   FormControl,
   alpha,
   useTheme,
+  useMediaQuery,
+  Card,
+  CardContent,
+  Chip,
 } from "@mui/material";
 import {
   KeyboardArrowLeft,
   KeyboardArrowRight,
   FirstPage,
   LastPage,
+  TrendingUp,
+  TrendingDown,
+  Remove,
+  AccessTime,
+  Speed,
 } from "@mui/icons-material";
 
 export interface TweetRecord {
@@ -38,6 +47,10 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
   const theme = useTheme();
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("md"));
 
   if (!records.length) {
     return (
@@ -79,6 +92,20 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
     return "#999";
   };
 
+  const getSentimentIcon = (rating: number | null) => {
+    if (rating === null || rating === undefined) return <Remove />;
+    if (rating > 0.3) return <TrendingUp />;
+    if (rating < -0.3) return <TrendingDown />;
+    return <Remove />;
+  };
+
+  const getSentimentLabel = (rating: number | null) => {
+    if (rating === null || rating === undefined) return "Neutral";
+    if (rating > 0.3) return "Bullish";
+    if (rating < -0.3) return "Bearish";
+    return "Neutral";
+  };
+
   const formatTime = (time: string) => {
     const date = new Date(time);
     return date.toLocaleString("en-US", {
@@ -89,161 +116,226 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
     });
   };
 
-  return (
-    <Box sx={{ width: "100%", overflow: "hidden" }}>
-      {/* Fixed Header */}
-      <Box
-        sx={{
-          backgroundColor: "#0a0a0a",
-          borderBottom: `2px solid ${alpha("#ff6b35", 0.3)}`,
-        }}
-      >
-        <Table size="small">
-          <TableHead>
-            <TableRow>
-              <TableCell
-                sx={{
-                  color: "#ff6b35",
-                  fontWeight: 600,
-                  backgroundColor: "#0a0a0a",
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  py: 2,
-                  border: "none",
-                }}
-              >
-                Tweet Content
-              </TableCell>
-              <TableCell
-                sx={{
-                  color: "#ff6b35",
-                  fontWeight: 600,
-                  backgroundColor: "#0a0a0a",
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  py: 2,
-                  width: "150px",
-                  border: "none",
-                }}
-                align="center"
-              >
-                Sentiment
-              </TableCell>
-              <TableCell
-                sx={{
-                  color: "#ff6b35",
-                  fontWeight: 600,
-                  backgroundColor: "#0a0a0a",
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  py: 2,
-                  width: "100px",
-                  border: "none",
-                }}
-                align="center"
-              >
-                Accuracy
-              </TableCell>
-              <TableCell
-                sx={{
-                  color: "#ff6b35",
-                  fontWeight: 600,
-                  backgroundColor: "#0a0a0a",
-                  fontSize: "0.85rem",
-                  letterSpacing: "0.05em",
-                  textTransform: "uppercase",
-                  py: 2,
-                  width: "120px",
-                  border: "none",
-                  paddingRight: "24px", // Account for scrollbar width
-                }}
-                align="right"
-              >
-                Time
-              </TableCell>
-            </TableRow>
-          </TableHead>
-        </Table>
-      </Box>
-
-      {/* Scrollable Body */}
-      <TableContainer
-        component={Paper}
-        sx={{
-          maxHeight: "750px",
-          backgroundColor: "transparent",
-          boxShadow: "none",
-          position: "relative",
-          "&::-webkit-scrollbar": {
-            width: "10px",
-            backgroundColor: alpha("#ff6b35", 0.05),
-          },
-          "&::-webkit-scrollbar-track": {
-            backgroundColor: alpha("#ff6b35", 0.1),
-            borderRadius: "5px",
-            margin: "5px 0",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: `linear-gradient(180deg, #ff6b35 0%, #ff8555 100%)`,
-            borderRadius: "5px",
-            border: "2px solid transparent",
-            backgroundClip: "content-box",
+  // Mobile Card View
+  const MobileCardView = () => (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+      {currentRecords.map((row, idx) => (
+        <Card
+          key={idx}
+          sx={{
+            backgroundColor: "#0a0a0a",
+            border: "1px solid #333",
+            borderRadius: 2,
             "&:hover": {
-              background: `linear-gradient(180deg, #ff8555 0%, #ffa575 100%)`,
-              backgroundClip: "content-box",
+              borderColor: "#555",
+              backgroundColor: "rgba(255, 255, 255, 0.02)",
             },
-          },
-          "& .MuiTable-root": {
-            backgroundColor: "transparent",
-          },
-        }}
-      >
-        <Table size="small">
-          <TableBody>
-            {currentRecords.map((row, idx) => (
-              <TableRow
-                key={idx}
-                hover
+            transition: "all 0.2s ease",
+          }}
+        >
+          <CardContent sx={{ p: 2 }}>
+            {/* Tweet Content */}
+            <Typography
+              sx={{
+                color: "white",
+                fontSize: "0.9rem",
+                lineHeight: 1.6,
+                mb: 2,
+              }}
+            >
+              {row.tweet}
+            </Typography>
+
+            {/* Metadata Row */}
+            <Box
+              sx={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 1.5,
+                alignItems: "center",
+              }}
+            >
+              {/* Sentiment Chip */}
+              <Chip
+                icon={getSentimentIcon(row.sentimentRating)}
+                label={`${getSentimentLabel(row.sentimentRating)} ${
+                  row.sentimentRating !== null
+                    ? `(${row.sentimentRating.toFixed(2)})`
+                    : ""
+                }`}
+                size="small"
                 sx={{
-                  "&:hover": {
-                    backgroundColor: alpha("#ff6b35", 0.05),
+                  backgroundColor: alpha(
+                    getSentimentColor(row.sentimentRating),
+                    0.2
+                  ),
+                  color: getSentimentColor(row.sentimentRating),
+                  borderColor: getSentimentColor(row.sentimentRating),
+                  border: "1px solid",
+                  "& .MuiChip-icon": {
+                    color: getSentimentColor(row.sentimentRating),
+                    fontSize: 16,
                   },
-                  transition: "background-color 0.2s ease",
+                }}
+              />
+
+              {/* Accuracy */}
+              {row.accuracy !== null && row.accuracy !== undefined && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <Speed sx={{ color: "#666", fontSize: 16 }} />
+                  <Typography sx={{ color: "#999", fontSize: "0.8rem" }}>
+                    {row.accuracy}% accuracy
+                  </Typography>
+                </Box>
+              )}
+
+              {/* Time */}
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  ml: { xs: 0, sm: "auto" },
                 }}
               >
-                <TableCell
+                <AccessTime sx={{ color: "#666", fontSize: 16 }} />
+                <Typography sx={{ color: "#666", fontSize: "0.8rem" }}>
+                  {formatTime(row.time)}
+                </Typography>
+              </Box>
+            </Box>
+          </CardContent>
+        </Card>
+      ))}
+    </Box>
+  );
+
+  // Desktop Table View
+  const DesktopTableView = () => (
+    <TableContainer
+      sx={{
+        backgroundColor: "transparent",
+        boxShadow: "none",
+      }}
+    >
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell
+              sx={{
+                color: "#888",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                backgroundColor: "transparent",
+                borderBottom: "1px solid #333",
+                py: 2,
+                textTransform: "none",
+              }}
+            >
+              Tweet Content
+            </TableCell>
+            <TableCell
+              sx={{
+                color: "#888",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                backgroundColor: "transparent",
+                borderBottom: "1px solid #333",
+                py: 2,
+                width: isTablet ? "120px" : "150px",
+                textTransform: "none",
+                display: { xs: "none", sm: "table-cell" },
+              }}
+              align="center"
+            >
+              Sentiment
+            </TableCell>
+            <TableCell
+              sx={{
+                color: "#888",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                backgroundColor: "transparent",
+                borderBottom: "1px solid #333",
+                py: 2,
+                width: "100px",
+                textTransform: "none",
+                display: { xs: "none", md: "table-cell" },
+              }}
+              align="center"
+            >
+              Accuracy
+            </TableCell>
+            <TableCell
+              sx={{
+                color: "#888",
+                fontSize: "0.9rem",
+                fontWeight: 600,
+                backgroundColor: "transparent",
+                borderBottom: "1px solid #333",
+                py: 2,
+                width: "120px",
+                textTransform: "none",
+              }}
+              align="right"
+            >
+              Time
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {currentRecords.map((row, idx) => (
+            <TableRow
+              key={idx}
+              sx={{
+                backgroundColor:
+                  idx % 2 === 0 ? "transparent" : "rgba(255, 255, 255, 0.02)",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.05)",
+                },
+                transition: "background-color 0.2s ease",
+              }}
+            >
+              <TableCell
+                sx={{
+                  color: "white",
+                  borderBottom: "1px solid #333",
+                  py: 2,
+                  fontSize: "0.9rem",
+                  lineHeight: 1.6,
+                }}
+              >
+                <Typography
                   sx={{
-                    color: "#ddd",
-                    borderBottom: `1px solid ${alpha("#fff", 0.05)}`,
-                    py: 2,
+                    display: "-webkit-box",
+                    WebkitLineClamp: isTablet ? 3 : 2,
+                    WebkitBoxOrient: "vertical",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    color: "white",
                     fontSize: "0.9rem",
-                    lineHeight: 1.6,
                   }}
-                  component="th"
-                  scope="row"
                 >
-                  <Typography
-                    sx={{
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                    }}
-                  >
-                    {row.tweet}
-                  </Typography>
-                </TableCell>
-                <TableCell
+                  {row.tweet}
+                </Typography>
+              </TableCell>
+              <TableCell
+                sx={{
+                  borderBottom: "1px solid #333",
+                  py: 2,
+                  display: { xs: "none", sm: "table-cell" },
+                }}
+                align="center"
+              >
+                <Box
                   sx={{
-                    borderBottom: `1px solid ${alpha("#fff", 0.05)}`,
-                    py: 2,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 0.5,
                   }}
-                  align="center"
                 >
+                  {getSentimentIcon(row.sentimentRating)}
                   <Typography
                     sx={{
                       color: getSentimentColor(row.sentimentRating),
@@ -256,58 +348,74 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
                       ? row.sentimentRating.toFixed(2)
                       : "N/A"}
                   </Typography>
-                </TableCell>
-                <TableCell
-                  sx={{
-                    borderBottom: `1px solid ${alpha("#fff", 0.05)}`,
-                    py: 2,
-                  }}
-                  align="center"
-                >
-                  <Typography
-                    sx={{
-                      color: "#999",
-                      fontSize: "0.875rem",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {row.accuracy !== null && row.accuracy !== undefined
-                      ? row.accuracy
-                      : "N/A"}
-                  </Typography>
-                </TableCell>
-                <TableCell
+                </Box>
+              </TableCell>
+              <TableCell
+                sx={{
+                  borderBottom: "1px solid #333",
+                  py: 2,
+                  display: { xs: "none", md: "table-cell" },
+                }}
+                align="center"
+              >
+                <Typography
                   sx={{
                     color: "#999",
-                    borderBottom: `1px solid ${alpha("#fff", 0.05)}`,
-                    py: 2,
-                    fontSize: "0.85rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
                   }}
-                  align="right"
                 >
-                  {formatTime(row.time)}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                  {row.accuracy !== null && row.accuracy !== undefined
+                    ? `${row.accuracy}%`
+                    : "N/A"}
+                </Typography>
+              </TableCell>
+              <TableCell
+                sx={{
+                  color: "#999",
+                  borderBottom: "1px solid #333",
+                  py: 2,
+                  fontSize: "0.85rem",
+                }}
+                align="right"
+              >
+                {formatTime(row.time)}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
 
-      {/* Pagination Controls */}
+  return (
+    <Box sx={{ width: "100%", backgroundColor: "transparent" }}>
+      {/* Conditional Rendering based on screen size */}
+      {isMobile ? <MobileCardView /> : <DesktopTableView />}
+
+      {/* Pagination Controls - Responsive */}
       <Box
         sx={{
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
           justifyContent: "space-between",
-          alignItems: "center",
-          mt: 2,
-          px: 1,
-          py: 1.5,
-          borderTop: "1px solid #222",
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: { xs: 2, sm: 0 },
+          mt: 3,
+          pt: 2,
+          borderTop: "1px solid #333",
         }}
       >
         {/* Rows per page selector */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          <Typography sx={{ color: "#666", fontSize: "0.813rem" }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            justifyContent: { xs: "center", sm: "flex-start" },
+          }}
+        >
+          <Typography sx={{ color: "#666", fontSize: "0.875rem" }}>
             Rows per page:
           </Typography>
           <FormControl size="small">
@@ -316,8 +424,8 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
               onChange={handleChangeRowsPerPage}
               sx={{
                 color: "#999",
-                fontSize: "0.813rem",
-                height: "28px",
+                fontSize: "0.875rem",
+                height: "32px",
                 "& .MuiOutlinedInput-notchedOutline": {
                   borderColor: "#333",
                 },
@@ -341,33 +449,55 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
           </FormControl>
         </Box>
 
-        {/* Page info */}
-        <Typography sx={{ color: "#666", fontSize: "0.813rem" }}>
-          {startIndex + 1}-{Math.min(endIndex, records.length)} of{" "}
+        {/* Page info - Hidden on mobile */}
+        <Typography
+          sx={{
+            color: "#666",
+            fontSize: "0.875rem",
+            display: { xs: "none", sm: "block" },
+          }}
+        >
+          Showing {startIndex + 1} - {Math.min(endIndex, records.length)} out of{" "}
           {records.length}
         </Typography>
 
         {/* Navigation buttons */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            justifyContent: { xs: "center", sm: "flex-end" },
+          }}
+        >
+          {/* First and Last page buttons - Hidden on mobile */}
           <IconButton
             onClick={() => handleChangePage(0)}
             disabled={page === 0}
             size="small"
             sx={{
               color: "#666",
-              "&:hover": { color: "#999" },
+              display: { xs: "none", sm: "inline-flex" },
+              "&:hover": {
+                color: "#999",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              },
               "&.Mui-disabled": { color: "#333" },
             }}
           >
             <FirstPage fontSize="small" />
           </IconButton>
+
           <IconButton
             onClick={() => handleChangePage(page - 1)}
             disabled={page === 0}
             size="small"
             sx={{
               color: "#666",
-              "&:hover": { color: "#999" },
+              "&:hover": {
+                color: "#999",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              },
               "&.Mui-disabled": { color: "#333" },
             }}
           >
@@ -377,8 +507,13 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
           <Typography
             sx={{
               color: "#666",
-              fontSize: "0.813rem",
-              px: 1.5,
+              fontSize: "0.875rem",
+              px: { xs: 1.5, sm: 2 },
+              py: 1,
+              backgroundColor: "rgba(255, 255, 255, 0.05)",
+              borderRadius: 1,
+              minWidth: { xs: "50px", sm: "60px" },
+              textAlign: "center",
             }}
           >
             {page + 1} / {totalPages}
@@ -390,19 +525,27 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
             size="small"
             sx={{
               color: "#666",
-              "&:hover": { color: "#999" },
+              "&:hover": {
+                color: "#999",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              },
               "&.Mui-disabled": { color: "#333" },
             }}
           >
             <KeyboardArrowRight fontSize="small" />
           </IconButton>
+
           <IconButton
             onClick={() => handleChangePage(totalPages - 1)}
             disabled={page >= totalPages - 1}
             size="small"
             sx={{
               color: "#666",
-              "&:hover": { color: "#999" },
+              display: { xs: "none", sm: "inline-flex" },
+              "&:hover": {
+                color: "#999",
+                backgroundColor: "rgba(255, 255, 255, 0.05)",
+              },
               "&.Mui-disabled": { color: "#333" },
             }}
           >
@@ -410,6 +553,21 @@ const TweetTable: React.FC<TweetTableProps> = ({ records }) => {
           </IconButton>
         </Box>
       </Box>
+
+      {/* Mobile Page Info */}
+      {isMobile && (
+        <Typography
+          sx={{
+            color: "#666",
+            fontSize: "0.8rem",
+            textAlign: "center",
+            mt: 2,
+          }}
+        >
+          Showing {startIndex + 1} - {Math.min(endIndex, records.length)} of{" "}
+          {records.length} tweets
+        </Typography>
+      )}
     </Box>
   );
 };

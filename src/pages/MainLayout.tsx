@@ -1,16 +1,13 @@
 import React from "react";
 import ResponsiveAppBar from "../AppBar";
-import CryptoTickerBar from '../ProfilePage/Components/CryptoTicker'; // Add this import
-
+import Footer from "../Footer/Footer";
 
 const MainLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
       <ResponsiveAppBar />
-      
-      <div style={{ padding: "24px", minHeight: "100vh", overflow: "auto" }}>
-        {children}
-      </div>
+      {children}
+      <Footer />
     </>
   );
 };

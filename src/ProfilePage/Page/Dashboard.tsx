@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Container,
   Box,
@@ -9,12 +9,31 @@ import {
   Grow,
   useTheme,
   alpha,
+  Divider,
+  Card,
+  CardContent,
+  Grid,
+  Paper,
+  Avatar,
+  LinearProgress,
+  Drawer,
+  IconButton,
+  useMediaQuery,
 } from "@mui/material";
 import {
   ShowChart,
   Timeline,
   Assessment,
   Visibility,
+  TrendingUp,
+  TrendingDown,
+  AccessTime,
+  Person,
+  Language,
+  Star,
+  Info,
+  Menu as MenuIcon,
+  Close as CloseIcon,
 } from "@mui/icons-material";
 import UserHeader from "../Components/UserHeader";
 import CoinTabs, { Coin } from "../Components/CoinTabs";
@@ -54,6 +73,16 @@ const Dashboard: React.FC = () => {
     accuracy: number;
   } | null>(null);
   const [profileLoading, setProfileLoading] = useState<boolean>(true);
+  const [leftDrawerOpen, setLeftDrawerOpen] = useState(false);
+  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
+  const [scrollPosition, setScrollPosition] = useState<
+    "start" | "middle" | "end"
+  >("start");
+  const coinScrollRef = useRef<HTMLDivElement>(null);
+
+  // Responsive breakpoints
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isTablet = useMediaQuery(theme.breakpoints.down("lg"));
 
   // User routing functionality from UserHookFunctionality branch
   const { username } = useParams<{ username: string }>();
@@ -67,159 +96,10 @@ const Dashboard: React.FC = () => {
     "daily"
   );
 
+  // Process data
   const coinList: Coin[] = [];
   const cryptoPrice: CandlestickData[] = [];
   const tweets: any[] = [];
-
-  // Enhanced scroll behavior
-  React.useEffect(() => {
-    document.body.style.overflow = "auto";
-    document.documentElement.style.overflow = "auto";
-    document.body.style.height = "auto";
-    document.documentElement.style.height = "auto";
-    document.body.style.backgroundColor = "#000";
-
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-      document.body.style.height = "";
-      document.documentElement.style.height = "";
-      document.body.style.backgroundColor = "";
-    };
-  }, []);
-
-  // Enhanced loading state
-  if (loading || cryptoloading) {
-    return (
-      <Box
-        sx={{
-          background:
-            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 3,
-        }}
-      >
-        <Box sx={{ position: "relative" }}>
-          <CircularProgress
-            size={80}
-            thickness={2}
-            sx={{
-              color: "#ff6b35",
-              "& .MuiCircularProgress-circle": {
-                strokeLinecap: "round",
-              },
-            }}
-          />
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 60,
-              height: 60,
-              borderRadius: "50%",
-              background: `radial-gradient(circle, ${alpha(
-                "#ff6b35",
-                0.2
-              )} 0%, transparent 70%)`,
-              animation: "pulse 2s ease-in-out infinite",
-              "@keyframes pulse": {
-                "0%": {
-                  transform: "translate(-50%, -50%) scale(0.8)",
-                  opacity: 1,
-                },
-                "50%": {
-                  transform: "translate(-50%, -50%) scale(1.2)",
-                  opacity: 0.5,
-                },
-                "100%": {
-                  transform: "translate(-50%, -50%) scale(0.8)",
-                  opacity: 1,
-                },
-              },
-            }}
-          />
-        </Box>
-        <Typography
-          sx={{
-            color: "white",
-            fontSize: "1.2rem",
-            letterSpacing: "0.05em",
-            animation: "fadeInOut 2s ease-in-out infinite",
-            "@keyframes fadeInOut": {
-              "0%, 100%": { opacity: 0.5 },
-              "50%": { opacity: 1 },
-            },
-          }}
-        >
-          Loading dashboard data...
-        </Typography>
-      </Box>
-    );
-  }
-
-  // Enhanced error state
-  if (error || cryptoerror) {
-    return (
-      <Box
-        sx={{
-          background:
-            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
-          minHeight: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <GlowingPaper
-          sx={{
-            borderColor: "#ff4444",
-            p: 4,
-            textAlign: "center",
-            maxWidth: 400,
-          }}
-        >
-          <Box
-            sx={{
-              width: 60,
-              height: 60,
-              borderRadius: "50%",
-              backgroundColor: alpha("#ff4444", 0.1),
-              border: `2px solid ${alpha("#ff4444", 0.3)}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              margin: "0 auto 2rem",
-            }}
-          >
-            <Typography
-              sx={{ color: "#ff4444", fontSize: "1.5rem", fontWeight: "bold" }}
-            >
-              !
-            </Typography>
-          </Box>
-          <Typography
-            sx={{
-              color: "#ff4444",
-              fontSize: "1.2rem",
-              fontWeight: "bold",
-              mb: 2,
-            }}
-          >
-            Error Loading Data
-          </Typography>
-          <Typography sx={{ color: "#888", lineHeight: 1.6 }}>
-            {error || cryptoerror}
-          </Typography>
-        </GlowingPaper>
-      </Box>
-    );
-  }
 
   // Process crypto pricing data
   if (cryptodata?.data) {
@@ -269,6 +149,195 @@ const Dashboard: React.FC = () => {
     }
   }
 
+  // Enhanced scroll behavior with dual scrollbar styling
+  React.useEffect(() => {
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
+    document.body.style.height = "auto";
+    document.documentElement.style.height = "auto";
+    document.body.style.backgroundColor = "#000";
+
+    // Simple grey scrollbars everywhere
+    const styleElement = document.createElement("style");
+    styleElement.id = "custom-scrollbar-styles";
+    styleElement.textContent = `
+      /* Scrollbars - Only for specific elements that need visible scrollbars */
+      .custom-scrollbar {
+        scrollbar-width: thin;
+        scrollbar-color: #666 transparent;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: #666;
+        border-radius: 3px;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar-thumb:active {
+        background: #555;
+      }
+      
+      .custom-scrollbar::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+    `;
+
+    // Remove existing custom scrollbar styles if they exist
+    const existingStyles = document.getElementById("custom-scrollbar-styles");
+    if (existingStyles) {
+      existingStyles.remove();
+    }
+
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.height = "";
+      document.documentElement.style.height = "";
+      document.body.style.backgroundColor = "";
+
+      // Remove custom scrollbar styles
+      const styles = document.getElementById("custom-scrollbar-styles");
+      if (styles) {
+        styles.remove();
+      }
+    };
+  }, []);
+
+  // Handle coin list scroll position
+  useEffect(() => {
+    const handleCoinScroll = () => {
+      if (coinScrollRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = coinScrollRef.current;
+        if (scrollLeft === 0) {
+          setScrollPosition("start");
+        } else if (scrollLeft + clientWidth >= scrollWidth - 1) {
+          setScrollPosition("end");
+        } else {
+          setScrollPosition("middle");
+        }
+      }
+    };
+
+    const scrollContainer = coinScrollRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener("scroll", handleCoinScroll);
+      handleCoinScroll(); // Initial check
+
+      return () => {
+        scrollContainer.removeEventListener("scroll", handleCoinScroll);
+      };
+    }
+  }, []); // Empty dependency array - only run on mount/unmount
+
+  // Enhanced loading state
+  if (loading || cryptoloading) {
+    return (
+      <Box
+        sx={{
+          background:
+            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
+          minHeight: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: 4,
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9999,
+        }}
+      >
+        <Box
+          sx={{
+            position: "relative",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <CircularProgress
+            size={80}
+            thickness={2}
+            sx={{
+              color: "#ff6b35",
+              "& .MuiCircularProgress-circle": {
+                strokeLinecap: "round",
+              },
+            }}
+          />
+        </Box>
+        <Typography
+          sx={{
+            color: "#ff6b35",
+            fontSize: "1.4rem",
+            fontWeight: 700,
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+          }}
+        >
+          Loading
+        </Typography>
+      </Box>
+    );
+  }
+
+  // Enhanced error state
+  if (error || cryptoerror) {
+    return (
+      <Box
+        sx={{
+          background:
+            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
+          minHeight: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          px: 2,
+        }}
+      >
+        <GlowingPaper
+          sx={{
+            borderColor: "#ff4444",
+            p: 4,
+            textAlign: "center",
+            maxWidth: 400,
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#ff4444",
+              fontSize: "1.2rem",
+              fontWeight: "bold",
+              mb: 2,
+            }}
+          >
+            Error Loading Data
+          </Typography>
+          <Typography sx={{ color: "#888", lineHeight: 1.6 }}>
+            {error || cryptoerror}
+          </Typography>
+        </GlowingPaper>
+      </Box>
+    );
+  }
+
   // Calculate stats
   const latestPrice =
     cryptoPrice.length > 0 ? cryptoPrice[cryptoPrice.length - 1].close : 0;
@@ -282,209 +351,751 @@ const Dashboard: React.FC = () => {
       ? tweets.reduce((acc, t) => acc + t.sentimentRating, 0) / tweets.length
       : 0;
 
+  // Mock data for demonstration
+  const totalTweets = 1247;
+  const bullishTweets = 523;
+  const bearishTweets = 298;
+  const neutralTweets = 426;
+  const userAccuracy = 84.2;
+  const userTimeframe = "Short Term";
+
+  // Sidebar Content Components
+  const LeftSidebarContent = () => (
+    <Box sx={{ p: { xs: 2, md: 3 }, height: "100%" }}>
+      {/* User Profile */}
+      <Box sx={{ mb: { xs: 3, md: 4 } }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 2,
+            mb: 3,
+            flexDirection: { xs: "column", sm: "row" },
+            textAlign: { xs: "center", sm: "left" },
+          }}
+        >
+          <Avatar
+            sx={{
+              width: { xs: 50, md: 60 },
+              height: { xs: 50, md: 60 },
+              backgroundColor: "#ff6b35",
+              fontSize: { xs: "1.2rem", md: "1.5rem" },
+              fontWeight: 600,
+            }}
+          >
+            {selectedUser.charAt(0).toUpperCase()}
+          </Avatar>
+          <Box>
+            <Typography
+              sx={{
+                color: "white",
+                fontSize: { xs: "1rem", md: "1.2rem" },
+                fontWeight: 600,
+              }}
+            >
+              @{selectedUser}
+            </Typography>
+            <Typography
+              sx={{
+                color: "#888",
+                fontSize: { xs: "0.8rem", md: "0.9rem" },
+              }}
+            >
+              Crypto Trader
+            </Typography>
+          </Box>
+        </Box>
+
+        {/* User Stats */}
+        <Box
+          sx={{
+            backgroundColor: "#111",
+            p: { xs: 2, md: 3 },
+            borderRadius: 2,
+            border: "1px solid #333",
+            mb: 3,
+          }}
+        >
+          <Box sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}>
+            <Typography
+              sx={{
+                color: "#888",
+                fontSize: { xs: "0.8rem", md: "0.9rem" },
+              }}
+            >
+              Accuracy Score
+            </Typography>
+            <Typography
+              sx={{
+                color: "#4caf50",
+                fontSize: { xs: "1rem", md: "1.1rem" },
+                fontWeight: 600,
+              }}
+            >
+              {userAccuracy}%
+            </Typography>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={userAccuracy}
+            sx={{
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: "#333",
+              "& .MuiLinearProgress-bar": {
+                backgroundColor: "#4caf50",
+                borderRadius: 3,
+              },
+            }}
+          />
+          <Typography
+            sx={{
+              color: "#888",
+              fontSize: { xs: "0.7rem", md: "0.8rem" },
+              mt: 1,
+              textAlign: "center",
+            }}
+          >
+            Avg. Trading Timeframe: {userTimeframe}
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Tweet Analysis Overview */}
+      <Box sx={{ mb: 4 }}>
+        <Typography
+          sx={{
+            color: "#ff6b35",
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 600,
+            mb: 3,
+            textTransform: "uppercase",
+            letterSpacing: "0.05em",
+          }}
+        >
+          Tweet Analysis
+        </Typography>
+
+        {/* Total Tweets */}
+        <Box
+          sx={{
+            backgroundColor: "#111",
+            p: { xs: 2, md: 3 },
+            borderRadius: 2,
+            border: "1px solid #333",
+            mb: 3,
+            textAlign: "center",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#888",
+              fontSize: { xs: "0.8rem", md: "0.9rem" },
+              mb: 1,
+            }}
+          >
+            Total Tweets Analyzed
+          </Typography>
+          <Typography
+            sx={{
+              color: "white",
+              fontSize: { xs: "1.5rem", md: "2rem" },
+              fontWeight: 700,
+            }}
+          >
+            {totalTweets.toLocaleString()}
+          </Typography>
+        </Box>
+
+        {/* Sentiment Breakdown */}
+        <Box
+          sx={{
+            backgroundColor: "#111",
+            p: { xs: 2, md: 3 },
+            borderRadius: 2,
+            border: "1px solid #333",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "white",
+              fontSize: { xs: "0.9rem", md: "1rem" },
+              fontWeight: 600,
+              mb: 3,
+              textAlign: "center",
+            }}
+          >
+            Sentiment Breakdown
+          </Typography>
+
+          {/* Bullish */}
+          <Box sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: "#4caf50",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: "#4caf50",
+                    fontSize: { xs: "0.8rem", md: "0.9rem" },
+                  }}
+                >
+                  Bullish
+                </Typography>
+              </Box>
+              <Typography
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "0.8rem", md: "0.9rem" },
+                }}
+              >
+                {bullishTweets}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={(bullishTweets / totalTweets) * 100}
+              sx={{
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: "#333",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "#4caf50",
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Box>
+
+          {/* Bearish */}
+          <Box sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: "#f44336",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: "#f44336",
+                    fontSize: { xs: "0.8rem", md: "0.9rem" },
+                  }}
+                >
+                  Bearish
+                </Typography>
+              </Box>
+              <Typography
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "0.8rem", md: "0.9rem" },
+                }}
+              >
+                {bearishTweets}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={(bearishTweets / totalTweets) * 100}
+              sx={{
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: "#333",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "#f44336",
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Box>
+
+          {/* Neutral */}
+          <Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 1,
+              }}
+            >
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: "#999",
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: "#999",
+                    fontSize: { xs: "0.8rem", md: "0.9rem" },
+                  }}
+                >
+                  Neutral
+                </Typography>
+              </Box>
+              <Typography
+                sx={{
+                  color: "white",
+                  fontSize: { xs: "0.8rem", md: "0.9rem" },
+                }}
+              >
+                {neutralTweets}
+              </Typography>
+            </Box>
+            <LinearProgress
+              variant="determinate"
+              value={(neutralTweets / totalTweets) * 100}
+              sx={{
+                height: 4,
+                borderRadius: 2,
+                backgroundColor: "#333",
+                "& .MuiLinearProgress-bar": {
+                  backgroundColor: "#999",
+                  borderRadius: 2,
+                },
+              }}
+            />
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+
+  const RightSidebarContent = () => (
+    <Box sx={{ p: { xs: 2, md: 3 }, height: "100%" }}>
+      {/* Coin Header */}
+      <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+        <Avatar
+          src={getCoinIcon(selectedCoin.toLowerCase())}
+          sx={{ width: { xs: 40, md: 50 }, height: { xs: 40, md: 50 } }}
+        />
+        <Box>
+          <Typography
+            sx={{
+              color: "white",
+              fontSize: { xs: "1.2rem", md: "1.4rem" },
+              fontWeight: 700,
+            }}
+          >
+            {selectedCoin}
+          </Typography>
+        
+        </Box>
+      </Box>
+
+      {/* Price Information */}
+      <Box
+        sx={{
+          mb: 4,
+        }}
+      >
+        <Typography
+          sx={{
+            color: "white",
+            fontSize: { xs: "1.5rem", md: "2rem" },
+            fontWeight: 600,
+            mb: 1,
+            lineHeight: 1,
+            letterSpacing: "0.05em",
+          }}
+        >
+          $
+          {latestPrice.toLocaleString("en-US", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}{" "}
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {priceChange >= 0 ? (
+            <TrendingUp sx={{ color: "#4caf50", fontSize: 16 }} />
+          ) : (
+            <TrendingDown sx={{ color: "#f44336", fontSize: 16 }} />
+          )}
+          <Typography
+            sx={{
+              color: priceChange >= 0 ? "#4caf50" : "#f44336",
+              fontSize: { xs: "0.9rem", md: "1rem" },
+              fontWeight: 600,
+            }}
+          >
+            {priceChange >= 0 ? "+" : ""}
+            {priceChange.toFixed(2)}%
+          </Typography>
+          <Typography
+            sx={{
+              color: "#888",
+              fontSize: { xs: "0.7rem", md: "0.8rem" },
+            }}
+          >
+            24h
+          </Typography>
+        </Box>
+      </Box>
+
+      {/* Market Statistics */}
+      <Box sx={{ mb: 3 }}>
+        {[
+          { label: "Market cap", value: "$2.07T" },
+          { label: "Volume (24h)", value: "$47.05B" },
+          { label: "Vol/Mkt Cap (24h)", value: "2.35%" },
+          { label: "Circulating supply", value: `19.87M ${selectedCoin}` },
+          { label: "Max. supply", value: `21M ${selectedCoin}` },
+          { label: "FDV", value: "$2.19T" },
+        ].map((item, index) => (
+          <Box
+            key={index}
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              py: { xs: 1.5, md: 2 },
+              borderBottom: index < 5 ? "1px solid #333" : "none",
+            }}
+          >
+            <Typography
+              sx={{
+                color: "#888",
+                fontSize: { xs: "0.8rem", md: "0.9rem" },
+              }}
+            >
+              {item.label}
+            </Typography>
+            <Typography
+              sx={{
+                color: "white",
+                fontSize: { xs: "0.8rem", md: "0.9rem" },
+              }}
+            >
+              {item.value}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      {/* Profile Score */}
+      <Box
+        sx={{
+          backgroundColor: "#111",
+          p: { xs: 2, md: 3 },
+          borderRadius: 2,
+          border: "1px solid #333",
+          mb: 3,
+        }}
+      >
+        <Typography
+          sx={{
+            color: "white",
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
+          Profile score
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={100}
+          sx={{
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: "#333",
+            "& .MuiLinearProgress-bar": {
+              backgroundColor: "#4caf50",
+              borderRadius: 4,
+            },
+          }}
+        />
+        <Typography
+          sx={{
+            color: "#4caf50",
+            fontSize: { xs: "0.8rem", md: "0.9rem" },
+            mt: 1,
+            textAlign: "right",
+          }}
+        >
+          100%
+        </Typography>
+      </Box>
+
+      {/* Links */}
+      <Box sx={{ mb: 3 }}>
+        <Typography
+          sx={{
+            color: "white",
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
+          Website
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            flexWrap: "wrap",
+            flexDirection: { xs: "column", sm: "row" },
+          }}
+        >
+          <Chip
+            label="Website"
+            size="small"
+            icon={<Language />}
+            sx={{
+              backgroundColor: "#333",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#444",
+              },
+            }}
+          />
+          <Chip
+            label="Whitepaper"
+            size="small"
+            icon={<Info />}
+            sx={{
+              backgroundColor: "#333",
+              color: "white",
+              "&:hover": {
+                backgroundColor: "#444",
+              },
+            }}
+          />
+        </Box>
+      </Box>
+
+      {/* Rating */}
+      <Box>
+        <Typography
+          sx={{
+            color: "white",
+            fontSize: { xs: "0.9rem", md: "1rem" },
+            fontWeight: 600,
+            mb: 2,
+          }}
+        >
+          Rating
+        </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography
+            sx={{
+              color: "white",
+              fontSize: { xs: "1rem", md: "1.1rem" },
+            }}
+          >
+            4.4
+          </Typography>
+          {[1, 2, 3, 4, 5].map((star) => (
+            <Star
+              key={star}
+              sx={{
+                color: star <= 4 ? "#ffd700" : "#333",
+                fontSize: { xs: 16, md: 20 },
+              }}
+            />
+          ))}
+        </Box>
+      </Box>
+    </Box>
+  );
+
   return (
     <Box
       sx={{
         backgroundColor: "#000",
         width: "100%",
         minHeight: "100vh",
-        overflow: "visible !important",
         position: "relative",
       }}
     >
-      <Container
-        maxWidth={false}
-        sx={{
-          px: 3,
-          py: 3,
-          display: "flex",
-          flexDirection: "column",
-          gap: 4,
-          position: "relative",
-          zIndex: 1,
-          width: "100%",
-          maxWidth: "1600px !important",
-          margin: "0 auto",
-        }}
-      >
-        {/* Enhanced Header */}
-        <Fade in timeout={500}>
-          <Box>
-            <UserHeader
-              username="@username"
-              avgTimeframe="Short Term"
-              accuracy={84}
-            />
-          </Box>
-        </Fade>
-
-        {/* Stats Row */}
-        <Grow in timeout={700}>
-          <Box
+      {/* Mobile Header */}
+      {isMobile && (
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            p: 2,
+            borderBottom: "1px solid #333",
+            backgroundColor: "#0a0a0a",
+          }}
+        >
+          <IconButton
+            onClick={() => setLeftDrawerOpen(true)}
+            sx={{ color: "white" }}
+          >
+            <Person />
+          </IconButton>
+          <Typography
             sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "1fr",
-                sm: "repeat(2, 1fr)",
-                md: "repeat(4, 1fr)",
-              },
-              gap: 2,
+              color: "white",
+              fontSize: "1.1rem",
+              fontWeight: 600,
             }}
           >
-            <AnimatedStat
-              label="Current Price"
-              value={`$${latestPrice.toFixed(2)}`}
-              icon={<ShowChart sx={{ color: "#ff6b35" }} />}
-              trend={Number(priceChange.toFixed(2))}
-            />
-            <AnimatedStat
-              label="24h Volume"
-              value="$2.4B"
-              icon={<Timeline sx={{ color: "#ff6b35" }} />}
-            />
-            <AnimatedStat
-              label="Avg Sentiment"
-              value={avgSentiment.toFixed(2)}
-              icon={<Assessment sx={{ color: "#ff6b35" }} />}
-            />
-            <AnimatedStat
-              label="Tweets Analyzed"
-              value={tweets.length}
-              icon={<Visibility sx={{ color: "#ff6b35" }} />}
-            />
-          </Box>
-        </Grow>
+            @{selectedUser}
+          </Typography>
+          <IconButton
+            onClick={() => setRightDrawerOpen(true)}
+            sx={{ color: "white" }}
+          >
+            <ShowChart />
+          </IconButton>
+        </Box>
+      )}
 
-        {/* Enhanced Controls Section */}
-        <Grow in timeout={900}>
-          <GlowingPaper sx={{ p: 3 }}>
+      {/* Main Layout */}
+      <Box
+        sx={{
+          display: "flex",
+          height: { xs: "auto", md: "100vh" },
+          flexDirection: { xs: "column", md: "row" },
+        }}
+      >
+        {/* Left Sidebar - Desktop */}
+        {!isMobile && (
+          <Box
+            sx={{
+              width: "320px",
+              borderRight: "1px solid #333",
+              backgroundColor: "#0a0a0a",
+              height: "100vh",
+              flexShrink: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              // Hide scrollbar but keep functionality
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
+          >
+            <LeftSidebarContent />
+          </Box>
+        )}
+
+        {/* Center Content */}
+        <Box
+          sx={{
+            flex: 1,
+            p: { xs: 2, md: 4 },
+            overflowY: { xs: "visible", md: "auto" },
+            height: { xs: "auto", md: "100vh" },
+            paddingTop: { xs: "1rem", md: "2rem" },
+            paddingBottom: { xs: "1rem", md: "2rem" },
+            // Hide scrollbar but keep functionality
+            scrollbarWidth: "none",
+            "&::-webkit-scrollbar": {
+              display: "none",
+            },
+            // For touch devices
+            WebkitOverflowScrolling: "touch",
+          }}
+        >
+          {/* Combined Chart Container with Coin Selection */}
+          <Box
+            sx={{
+              width: "100%",
+              backgroundColor: "#0a0a0a",
+              borderRadius: 2,
+              border: `1px solid ${alpha("#ff6b35", 0.2)}`,
+              mb: { xs: 3, md: 4 },
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            {/* Coin Selection Header */}
             <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems={{ xs: "flex-start", md: "center" }}
-              flexDirection={{ xs: "column", md: "row" }}
-              gap={3}
+              ref={coinScrollRef}
+              sx={{
+                p: 2,
+                borderBottom: `1px solid ${alpha("#ff6b35", 0.1)}`,
+                overflowX: "auto",
+                overflowY: "hidden",
+                scrollBehavior: "smooth",
+                position: "relative",
+                // Hide scrollbar but keep functionality
+                scrollbarWidth: "none",
+                "&::-webkit-scrollbar": {
+                  display: "none",
+                },
+                // Gradient fade indicators
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: "30px",
+                  background:
+                    "linear-gradient(90deg, #0a0a0a 0%, transparent 100%)",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                  opacity: scrollPosition === "start" ? 0 : 1,
+                  transition: "opacity 0.3s ease",
+                },
+                "&::after": {
+                  content: '""',
+                  position: "absolute",
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  width: "30px",
+                  background:
+                    "linear-gradient(270deg, #0a0a0a 0%, transparent 100%)",
+                  zIndex: 2,
+                  pointerEvents: "none",
+                  opacity: scrollPosition === "end" ? 0 : 1,
+                  transition: "opacity 0.3s ease",
+                },
+              }}
             >
-              <Box sx={{ width: { xs: "100%", md: "auto" } }}>
-                <Typography
-                  sx={{
-                    color: "#ff6b35",
-                    mb: 2,
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Select Cryptocurrency
-                </Typography>
+              <Box sx={{ display: "inline-flex", gap: 1 }}>
                 <CoinTabs
                   coins={coinList.length > 0 ? coinList : COINS}
                   selected={selectedCoin}
                   onChange={setSelectedCoin}
                 />
               </Box>
-              <Box sx={{ width: { xs: "100%", md: "300px" } }}>
-                <Typography
-                  sx={{
-                    color: "#ff6b35",
-                    mb: 2,
-                    fontWeight: 600,
-                    fontSize: "0.9rem",
-                    letterSpacing: "0.05em",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Search Accounts
-                </Typography>
-                <SearchAccounts onSearch={setSearchTerm} />
-              </Box>
-            </Box>
-          </GlowingPaper>
-        </Grow>
-
-        {/* Enhanced Trading Chart Section */}
-        <Grow in timeout={1100}>
-          <GlowingPaper sx={{ p: 3 }}>
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              mb={3}
-              flexWrap="wrap"
-              gap={2}
-            >
-              <Box display="flex" alignItems="center" gap={2}>
-                <Typography
-                  variant="h5"
-                  sx={{
-                    color: "white",
-                    fontWeight: 700,
-                    fontSize: { xs: "1.2rem", md: "1.5rem" },
-                    letterSpacing: "-0.02em",
-                  }}
-                >
-                  {selectedCoin} Price Chart
-                </Typography>
-                <Chip
-                  label="LIVE"
-                  size="small"
-                  sx={{
-                    backgroundColor: "#ff6b35",
-                    color: "black",
-                    fontWeight: "bold",
-                    fontSize: "0.7rem",
-                    animation: "pulse 2s ease-in-out infinite",
-                    "@keyframes pulse": {
-                      "0%, 100%": { opacity: 1 },
-                      "50%": { opacity: 0.7 },
-                    },
-                  }}
-                />
-              </Box>
-              <Box display="flex" gap={1}>
-                {["1D", "1W", "1M", "3M", "1Y"].map((period) => (
-                  <Chip
-                    key={period}
-                    label={period}
-                    size="small"
-                    variant="outlined"
-                    sx={{
-                      borderColor: alpha("#ff6b35", 0.3),
-                      color: "#888",
-                      "&:hover": {
-                        borderColor: "#ff6b35",
-                        color: "#ff6b35",
-                        backgroundColor: alpha("#ff6b35", 0.1),
-                      },
-                    }}
-                  />
-                ))}
-              </Box>
             </Box>
 
+            {/* Trading Chart */}
             <Box
               sx={{
-                width: "100%",
-                height: "500px",
-                backgroundColor: "#0a0a0a",
-                borderRadius: 2,
-                border: `1px solid ${alpha("#ff6b35", 0.2)}`,
+                flex: 1,
+                height: { xs: "300px", sm: "400px", md: "500px" },
                 position: "relative",
-                overflow: "hidden",
-                boxShadow: `inset 0 0 20px ${alpha("#000", 0.5)}`,
               }}
             >
               {cryptoPrice.length > 0 ? (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    position: "relative",
-                  }}
-                >
-                  <TradingChart candlestickdata={cryptoPrice} tweets={tweets} />
-                </Box>
+                <TradingChart candlestickdata={cryptoPrice} tweets={tweets} />
               ) : (
                 <Box
                   sx={{
@@ -496,110 +1107,46 @@ const Dashboard: React.FC = () => {
                     gap: 2,
                   }}
                 >
-                  <Box
+                  <ShowChart
                     sx={{
-                      width: 80,
-                      height: 80,
-                      borderRadius: "50%",
-                      border: `2px solid ${alpha("#ff6b35", 0.3)}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      color: "#ff6b35",
+                      fontSize: { xs: 40, md: 60 },
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: "#666",
+                      fontSize: { xs: "1rem", md: "1.2rem" },
+                      textAlign: "center",
+                      px: 2,
                     }}
                   >
-                    <ShowChart sx={{ color: "#ff6b35", fontSize: 40 }} />
-                  </Box>
-                  <Typography sx={{ color: "#666", fontSize: "1.1rem" }}>
                     No chart data available for {selectedCoin}
                   </Typography>
                 </Box>
               )}
             </Box>
-          </GlowingPaper>
-        </Grow>
+          </Box>
 
-        {/* Enhanced Tweet Analysis Section */}
-        <Grow in timeout={1300}>
-          <GlowingPaper sx={{ p: 3 }}>
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-              mb={3}
-              flexWrap="wrap"
-              gap={2}
+          {/* Sentiment Analysis */}
+          <Box>
+            <Typography
+              variant="h6"
+              sx={{
+                color: "white",
+                fontWeight: 600,
+                mb: { xs: 2, md: 3 },
+                fontSize: { xs: "1.1rem", md: "1.25rem" },
+              }}
             >
-              <Typography
-                variant="h5"
-                sx={{
-                  color: "white",
-                  fontWeight: 700,
-                  fontSize: { xs: "1.2rem", md: "1.5rem" },
-                  letterSpacing: "-0.02em",
-                }}
-              >
-                Sentiment Analysis
-              </Typography>
-              <Box display="flex" gap={2} alignItems="center">
-                <Typography
-                  sx={{
-                    color: "white",
-                    fontSize: "0.875rem",
-                  }}
-                >
-                  {tweets.length} tweets analyzed
-                </Typography>
-                <Box sx={{ display: "flex", gap: 1 }}>
-                  <Chip
-                    label="Bullish"
-                    clickable
-                    sx={{
-                      backgroundColor: "transparent",
-                      border: "1px solid #4caf50",
-                      color: "#4caf50",
-                      fontSize: "0.75rem",
-                      "&:hover": {
-                        backgroundColor: alpha("#4caf50", 0.1),
-                      },
-                    }}
-                  />
-                  <Chip
-                    label="Neutral"
-                    clickable
-                    sx={{
-                      backgroundColor: "transparent",
-                      border: "1px solid #999",
-                      color: "#999",
-                      fontSize: "0.75rem",
-                      "&:hover": {
-                        backgroundColor: alpha("#999", 0.1),
-                      },
-                    }}
-                  />
-                  <Chip
-                    label="Bearish"
-                    clickable
-                    sx={{
-                      backgroundColor: "transparent",
-                      border: "1px solid #f44336",
-                      color: "#f44336",
-                      fontSize: "0.75rem",
-                      "&:hover": {
-                        backgroundColor: alpha("#f44336", 0.1),
-                      },
-                    }}
-                  />
-                </Box>
-              </Box>
-            </Box>
+              Sentiment Analysis
+            </Typography>
 
             {tweets.length > 0 ? (
               <Box
                 sx={{
-                  backgroundColor: "#0a0a0a",
-                  borderRadius: 2,
-                  border: `1px solid ${alpha("#ff6b35", 0.2)}`,
-                  overflow: "hidden",
+                  backgroundColor: "transparent",
+                  width: "100%",
                 }}
               >
                 <TweetTable records={tweets} />
@@ -611,67 +1158,138 @@ const Dashboard: React.FC = () => {
                   flexDirection: "column",
                   justifyContent: "center",
                   alignItems: "center",
-                  height: 250,
+                  height: { xs: 200, md: 300 },
                   backgroundColor: "#0a0a0a",
                   borderRadius: 2,
                   border: `1px solid ${alpha("#ff6b35", 0.2)}`,
                   gap: 3,
                   textAlign: "center",
-                  p: 4,
+                  p: 2,
                 }}
               >
-                <Box
+                <Assessment
                   sx={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: "50%",
-                    border: `2px solid ${alpha("#ff6b35", 0.3)}`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
+                    color: "#ff6b35",
+                    fontSize: { xs: 40, md: 60 },
                   }}
-                >
-                  <Assessment sx={{ color: "#ff6b35", fontSize: 40 }} />
-                </Box>
+                />
                 <Box>
-                  <Typography sx={{ color: "#888", fontSize: "1.2rem", mb: 1 }}>
+                  <Typography
+                    sx={{
+                      color: "#888",
+                      fontSize: { xs: "1rem", md: "1.2rem" },
+                      mb: 1,
+                    }}
+                  >
                     No tweet data available for {selectedCoin}
                   </Typography>
-                  <Typography sx={{ color: "#666", fontSize: "0.95rem" }}>
-                    Try selecting a different cryptocurrency or check back later
+                  <Typography
+                    sx={{
+                      color: "#666",
+                      fontSize: { xs: "0.8rem", md: "0.95rem" },
+                    }}
+                  >
+                    Try selecting a different cryptocurrency
                   </Typography>
                 </Box>
               </Box>
             )}
-          </GlowingPaper>
-        </Grow>
+          </Box>
+        </Box>
 
-        {/* Bottom spacer */}
-        <Box sx={{ height: "80px" }} />
-      </Container>
+        {/* Right Sidebar - Desktop */}
+        {!isMobile && (
+          <Box
+            sx={{
+              width: "300px",
+              borderLeft: "1px solid #333",
+              backgroundColor: "#0a0a0a",
+              height: "100vh",
+              flexShrink: 0,
+              overflowY: "auto",
+              overflowX: "hidden",
+              // Hide scrollbar but keep functionality
+              scrollbarWidth: "none",
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
+          >
+            <RightSidebarContent />
+          </Box>
+        )}
+      </Box>
+
+      {/* Mobile Drawers */}
+      <Drawer
+        anchor="left"
+        open={leftDrawerOpen}
+        onClose={() => setLeftDrawerOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            backgroundColor: "#0a0a0a",
+            color: "white",
+            width: { xs: "280px", sm: "320px" },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 2,
+            borderBottom: "1px solid #333",
+          }}
+        >
+          <Typography sx={{ color: "white", fontWeight: 600 }}>
+            User Info
+          </Typography>
+          <IconButton
+            onClick={() => setLeftDrawerOpen(false)}
+            sx={{ color: "white" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <LeftSidebarContent />
+      </Drawer>
+
+      <Drawer
+        anchor="right"
+        open={rightDrawerOpen}
+        onClose={() => setRightDrawerOpen(false)}
+        sx={{
+          "& .MuiDrawer-paper": {
+            backgroundColor: "#0a0a0a",
+            color: "white",
+            width: { xs: "280px", sm: "300px" },
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 2,
+            borderBottom: "1px solid #333",
+          }}
+        >
+          <Typography sx={{ color: "white", fontWeight: 600 }}>
+            Coin Info
+          </Typography>
+          <IconButton
+            onClick={() => setRightDrawerOpen(false)}
+            sx={{ color: "white" }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </Box>
+        <RightSidebarContent />
+      </Drawer>
     </Box>
   );
 };
 
 export default Dashboard;
-
-/** Returns true if every `time` value is unique */
-// export function areTimesUnique(data: CandlestickData[]): boolean {
-//   const seen = new Set<Object>();
-//   for (const { time } of data) {
-//     if (seen.has(time)) return false;
-//     seen.add(time);
-//   }
-//   return true;
-// }
-
-// /** Returns an array of duplicate timestamps (empty if none) */
-// export function findDuplicateTimes(data: CandlestickData[]): Object[] {
-//   const seen = new Set<Object>();
-//   const dupes: Object[] = [];
-//   for (const { time } of data) {
-//     if (seen.has(time)) dupes.push(time);
-//     else seen.add(time);
-//   }
-//   return Array.from(new Set(dupes));
-// }

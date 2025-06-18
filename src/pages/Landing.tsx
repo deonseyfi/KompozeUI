@@ -147,7 +147,7 @@ const Landing = () => {
 
       {/* Welcome text */}
       <div className="welcome-text">
-        <strong>Hi, I am Z31, the agent for Kompoz</strong>
+       
       </div>
     </div>
   );

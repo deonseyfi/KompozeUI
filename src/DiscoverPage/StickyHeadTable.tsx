@@ -38,9 +38,11 @@ import {
   filterUsersByWatchlist,
 } from "./Components/WatchlistFunctionality";
 import SearchBar, { RowData as SearchBarRowData } from "./Components/SearchBar"; // Import the new SearchBar component
-import { fetchProfilePicturesBatch, preloadVisibleAndNext } from "./apidata/ProfilePicturesFetch";
+import {
+  fetchProfilePicturesBatch,
+  preloadVisibleAndNext,
+} from "./apidata/ProfilePicturesFetch";
 import { OptimizedAvatar } from "./Components/OptimizedAvitar";
-
 
 export interface RowData {
   username: string;
@@ -133,7 +135,74 @@ export default function EnhancedTable() {
   } = useWatchlist();
 
   const rowsPerPage = 9;
-  
+
+  // Enhanced scroll behavior with thin grey scrollbar
+  React.useEffect(() => {
+    document.body.style.overflow = "auto";
+    document.documentElement.style.overflow = "auto";
+    document.body.style.height = "auto";
+    document.documentElement.style.height = "auto";
+    document.body.style.backgroundColor = "#000";
+
+    // Add custom thin grey scrollbar styles
+    const styleElement = document.createElement("style");
+    styleElement.id = "custom-scrollbar-styles";
+    styleElement.textContent = `
+      /* All Scrollbars - Thin and Grey */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: #666 transparent;
+      }
+      
+      *::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+      }
+      
+      *::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      
+      *::-webkit-scrollbar-thumb {
+        background: #666;
+        border-radius: 3px;
+      }
+      
+      *::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      }
+      
+      *::-webkit-scrollbar-thumb:active {
+        background: #555;
+      }
+      
+      *::-webkit-scrollbar-corner {
+        background: transparent;
+      }
+    `;
+
+    // Remove existing custom scrollbar styles if they exist
+    const existingStyles = document.getElementById("custom-scrollbar-styles");
+    if (existingStyles) {
+      existingStyles.remove();
+    }
+
+    document.head.appendChild(styleElement);
+
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+      document.body.style.height = "";
+      document.documentElement.style.height = "";
+      document.body.style.backgroundColor = "";
+
+      // Remove custom scrollbar styles
+      const styles = document.getElementById("custom-scrollbar-styles");
+      if (styles) {
+        styles.remove();
+      }
+    };
+  }, []);
 
   React.useEffect(() => {
     const loadDataWithProperCaching = async () => {
@@ -141,7 +210,6 @@ export default function EnhancedTable() {
         setLoading(true);
         setError(null);
         setProfilePicsLoading(true);
-
 
         // Load sentiment data and profile pictures in parallel
         const [sentimentData, profilePicsData] = await Promise.all([
@@ -151,7 +219,6 @@ export default function EnhancedTable() {
             fetchProfilePicturesBatch(data.map((row) => row.username))
           ),
         ]);
-
 
         // Set data immediately
         setRows(sentimentData);
@@ -174,12 +241,12 @@ export default function EnhancedTable() {
     loadDataWithProperCaching();
   }, []);
 
-    // ✅ PRELOAD NEXT PAGE: When user changes pages
-    React.useEffect(() => {
-      if (Object.keys(profilePics).length > 0) {
-        preloadVisibleAndNext(profilePics, page, rowsPerPage);
-      }
-    }, [page, profilePics]);
+  // ✅ PRELOAD NEXT PAGE: When user changes pages
+  React.useEffect(() => {
+    if (Object.keys(profilePics).length > 0) {
+      preloadVisibleAndNext(profilePics, page, rowsPerPage);
+    }
+  }, [page, profilePics]);
 
   const handleChangePage = (event: unknown, newPage: number) => {
     setPage(newPage);
@@ -245,7 +312,7 @@ export default function EnhancedTable() {
       <Box
         sx={{
           backgroundColor: "#000",
-          minHeight: "100vh",
+          minHeight: "400px",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -264,7 +331,7 @@ export default function EnhancedTable() {
       <Box
         sx={{
           backgroundColor: "#000",
-          minHeight: "100vh",
+          minHeight: "400px",
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
@@ -276,7 +343,7 @@ export default function EnhancedTable() {
   }
 
   return (
-    <Box sx={{ backgroundColor: "#000", minHeight: "100vh", py: 3, px: 4 }}>
+    <Box sx={{ backgroundColor: "#000", py: 3, px: 4 }}>
       {/* Top Row */}
       <Box
         display="flex"
@@ -303,7 +370,7 @@ export default function EnhancedTable() {
 
       {/* Table */}
       <Paper sx={{ backgroundColor: "#000", boxShadow: "none" }}>
-        <TableContainer sx={{ maxHeight: "70vh" }}>
+        <TableContainer sx={{ maxHeight: "none" }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -336,8 +403,8 @@ export default function EnhancedTable() {
                   >
                     <TableCell sx={cellStyle}>
                       <Box display="flex" alignItems="center" gap={2}>
-                      {/* ✅ OPTIMIZED AVATAR: Instagram-style loading */}
-                      <OptimizedAvatar
+                        {/* ✅ OPTIMIZED AVATAR: Instagram-style loading */}
+                        <OptimizedAvatar
                           username={row.username}
                           profilePicUrl={profilePics[row.username]}
                         />
