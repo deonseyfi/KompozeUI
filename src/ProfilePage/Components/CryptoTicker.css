@@ -1,7 +1,7 @@
 .ticker-bar {
-  background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
-  border-bottom: 1px solid rgba(255, 165, 0, 0.3);
-  height: 40px;
+  background: linear-gradient(135deg, #000000 0%, #000000 100%);
+  border-bottom: 0px solid rgba(255, 255, 255, 0.165);
+  height: 35px;
   width: 100%;
   position: relative;
   top: 0;
@@ -10,7 +10,6 @@
   overflow: hidden;
   padding-top: 10px;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .ticker-content {
@@ -28,32 +27,43 @@
   animation: scroll 120s linear infinite;
   white-space: nowrap;
   will-change: transform;
+  padding-left: 100%; /* Start from right edge */
 }
 
 .ticker-item {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin-right: 32px;
+  gap: 6px; /* Tighter gap between symbol, price, and change */
+  padding: 0 24px; /* Even padding on both sides instead of margin */
   font-size: 13px;
   font-weight: 500;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* Optional: Add a separator between items */
+.ticker-item:not(:last-child)::after {
+  content: "•";
+  position: absolute;
+  right: 0;
+  color: #333;
+  font-size: 8px;
 }
 
 .crypto-symbol {
   color: #fff;
   font-weight: 600;
-  min-width: 40px;
+  /* Remove min-width for more natural spacing */
 }
 
 .crypto-price {
   color: #f0f0f0;
-  min-width: 80px;
+  /* Remove min-width for more natural spacing */
 }
 
 .crypto-change {
   font-weight: 600;
-  min-width: 60px;
+  /* Remove min-width for more natural spacing */
 }
 
 .crypto-change.positive {
@@ -72,10 +82,10 @@
 
 @keyframes scroll {
   0% {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%); /* Only need to move half since we're duplicating */
   }
 }
 
@@ -90,20 +100,12 @@
   }
   
   .ticker-item {
-    margin-right: 20px;
+    padding: 0 16px; /* Smaller padding on mobile */
     font-size: 12px;
-    gap: 6px;
+    gap: 4px; /* Tighter gap on mobile */
   }
 
-  .crypto-symbol {
-    min-width: 35px;
-  }
-  
-  .crypto-price {
-    min-width: 60px;
-  }
-  
-  .crypto-change {
-    min-width: 50px;
+  .ticker-item:not(:last-child)::after {
+    font-size: 6px;
   }
 }
