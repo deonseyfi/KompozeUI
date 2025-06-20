@@ -19,6 +19,8 @@ import {
   Drawer,
   IconButton,
   useMediaQuery,
+  Tab,
+  Tabs,
 } from "@mui/material";
 import {
   ShowChart,
@@ -53,6 +55,7 @@ import {
   BusinessDay,
   UTCTimestamp,
 } from "lightweight-charts";
+import { ConsistentLoader } from "../../GlobalComponents/Loader";
 
 // This is hardcoded for 6 coins
 const COINS: Coin[] = [
@@ -63,6 +66,65 @@ const COINS: Coin[] = [
   { symbol: "DOGE", imageUrl: getCoinIcon("doge") },
   { symbol: "LINK", imageUrl: getCoinIcon("link") },
 ];
+
+// Custom Coin Tab Component
+const CoinTab = ({
+  coin,
+  selected,
+  onClick,
+  disabled,
+}: {
+  coin: Coin;
+  selected: boolean;
+  onClick: () => void;
+  disabled?: boolean;
+}) => (
+  <Box
+    onClick={disabled ? undefined : onClick}
+    sx={{
+      display: "flex",
+      alignItems: "center",
+      gap: 0.5,
+      px: 1.5,
+      py: 0.75,
+      borderRadius: "8px",
+      cursor: disabled ? "not-allowed" : "pointer",
+      transition: "all 0.2s ease",
+      backgroundColor: selected ? alpha("#ff6b35", 0.15) : "transparent",
+      border: `1px solid ${selected ? "#ff6b35" : "transparent"}`,
+      opacity: disabled ? 0.5 : 1,
+      "&:hover": disabled
+        ? {}
+        : {
+            backgroundColor: selected
+              ? alpha("#ff6b35", 0.15)
+              : alpha("#fff", 0.05),
+            borderColor: selected ? "#ff6b35" : alpha("#fff", 0.1),
+          },
+    }}
+  >
+    <Avatar
+      src={coin.imageUrl}
+      sx={{
+        width: 20,
+        height: 20,
+        "& img": {
+          objectFit: "contain",
+        },
+      }}
+    />
+    <Typography
+      sx={{
+        color: selected ? "#ff6b35" : "#888",
+        fontSize: "0.875rem",
+        fontWeight: selected ? 600 : 500,
+        letterSpacing: "0.02em",
+      }}
+    >
+      {coin.symbol}
+    </Typography>
+  </Box>
+);
 
 const Dashboard: React.FC = () => {
   const theme = useTheme();
@@ -79,6 +141,10 @@ const Dashboard: React.FC = () => {
     "start" | "middle" | "end"
   >("start");
   const coinScrollRef = useRef<HTMLDivElement>(null);
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+
+  // FORCE LOADING STATE
+  const [forceLoading, setForceLoading] = useState(true);
 
   // Responsive breakpoints
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -95,6 +161,16 @@ const Dashboard: React.FC = () => {
     new Date().toString(),
     "daily"
   );
+
+  // Force show loader on mount for minimum time
+  useEffect(() => {
+    setForceLoading(true);
+    const timer = setTimeout(() => {
+      setForceLoading(false);
+    }, 1500); // Show for 1.5 seconds minimum
+
+    return () => clearTimeout(timer);
+  }, []); // Empty deps - only on mount
 
   // Process data
   const coinList: Coin[] = [];
@@ -149,74 +225,6 @@ const Dashboard: React.FC = () => {
     }
   }
 
-  // Enhanced scroll behavior with dual scrollbar styling
-  React.useEffect(() => {
-    document.body.style.overflow = "auto";
-    document.documentElement.style.overflow = "auto";
-    document.body.style.height = "auto";
-    document.documentElement.style.height = "auto";
-    document.body.style.backgroundColor = "#000";
-
-    // Simple grey scrollbars everywhere
-    const styleElement = document.createElement("style");
-    styleElement.id = "custom-scrollbar-styles";
-    styleElement.textContent = `
-      /* Scrollbars - Only for specific elements that need visible scrollbars */
-      .custom-scrollbar {
-        scrollbar-width: thin;
-        scrollbar-color: #666 transparent;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar {
-        width: 6px;
-        height: 6px;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #666;
-        border-radius: 3px;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #888;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar-thumb:active {
-        background: #555;
-      }
-      
-      .custom-scrollbar::-webkit-scrollbar-corner {
-        background: transparent;
-      }
-    `;
-
-    // Remove existing custom scrollbar styles if they exist
-    const existingStyles = document.getElementById("custom-scrollbar-styles");
-    if (existingStyles) {
-      existingStyles.remove();
-    }
-
-    document.head.appendChild(styleElement);
-
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-      document.body.style.height = "";
-      document.documentElement.style.height = "";
-      document.body.style.backgroundColor = "";
-
-      // Remove custom scrollbar styles
-      const styles = document.getElementById("custom-scrollbar-styles");
-      if (styles) {
-        styles.remove();
-      }
-    };
-  }, []);
-
   // Handle coin list scroll position
   useEffect(() => {
     const handleCoinScroll = () => {
@@ -243,68 +251,16 @@ const Dashboard: React.FC = () => {
     }
   }, []); // Empty dependency array - only run on mount/unmount
 
-  // Enhanced loading state
-  if (loading || cryptoloading) {
-    return (
-      <Box
-        sx={{
-          background:
-            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          gap: 4,
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          zIndex: 9999,
-        }}
-      >
-        <Box
-          sx={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <CircularProgress
-            size={80}
-            thickness={2}
-            sx={{
-              color: "#ff6b35",
-              "& .MuiCircularProgress-circle": {
-                strokeLinecap: "round",
-              },
-            }}
-          />
-        </Box>
-        <Typography
-          sx={{
-            color: "#ff6b35",
-            fontSize: "1.4rem",
-            fontWeight: 700,
-            letterSpacing: "0.1em",
-            textTransform: "uppercase",
-          }}
-        >
-          Loading
-        </Typography>
-      </Box>
-    );
-  }
+  // Determine if we should show loading
+  const isInitialLoading = forceLoading || loading;
+  const isChartLoading = cryptoloading;
 
   // Enhanced error state
   if (error || cryptoerror) {
     return (
       <Box
         sx={{
-          background:
-            "radial-gradient(ellipse at center, #1a1a1a 0%, #000 100%)",
+          backgroundColor: "#000",
           minHeight: "100vh",
           display: "flex",
           justifyContent: "center",
@@ -359,7 +315,7 @@ const Dashboard: React.FC = () => {
   const userAccuracy = 84.2;
   const userTimeframe = "Short Term";
 
-  // Sidebar Content Components
+  // Sidebar Content Components (keeping the same as before)
   const LeftSidebarContent = () => (
     <Box sx={{ p: { xs: 2, md: 3 }, height: "100%" }}>
       {/* User Profile */}
@@ -706,7 +662,6 @@ const Dashboard: React.FC = () => {
           >
             {selectedCoin}
           </Typography>
-        
         </Box>
       </Box>
 
@@ -934,6 +889,11 @@ const Dashboard: React.FC = () => {
         position: "relative",
       }}
     >
+      <ConsistentLoader
+        loading={isInitialLoading}
+        message="Loading Dashboard"
+      />
+
       {/* Mobile Header */}
       {isMobile && (
         <Box
@@ -944,11 +904,14 @@ const Dashboard: React.FC = () => {
             p: 2,
             borderBottom: "1px solid #333",
             backgroundColor: "#0a0a0a",
+            opacity: isInitialLoading ? 0 : 1,
+            transition: "opacity 0.3s ease",
           }}
         >
           <IconButton
             onClick={() => setLeftDrawerOpen(true)}
             sx={{ color: "white" }}
+            disabled={isInitialLoading}
           >
             <Person />
           </IconButton>
@@ -964,6 +927,7 @@ const Dashboard: React.FC = () => {
           <IconButton
             onClick={() => setRightDrawerOpen(true)}
             sx={{ color: "white" }}
+            disabled={isInitialLoading}
           >
             <ShowChart />
           </IconButton>
@@ -976,6 +940,8 @@ const Dashboard: React.FC = () => {
           display: "flex",
           height: { xs: "auto", md: "100vh" },
           flexDirection: { xs: "column", md: "row" },
+          opacity: isInitialLoading ? 0 : 1,
+          transition: "opacity 0.3s ease",
         }}
       >
         {/* Left Sidebar - Desktop */}
@@ -989,11 +955,6 @@ const Dashboard: React.FC = () => {
               flexShrink: 0,
               overflowY: "auto",
               overflowX: "hidden",
-              // Hide scrollbar but keep functionality
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
             }}
           >
             <LeftSidebarContent />
@@ -1005,17 +966,10 @@ const Dashboard: React.FC = () => {
           sx={{
             flex: 1,
             p: { xs: 2, md: 4 },
-            overflowY: { xs: "visible", md: "auto" },
+            overflowY: "auto",
             height: { xs: "auto", md: "100vh" },
             paddingTop: { xs: "1rem", md: "2rem" },
             paddingBottom: { xs: "1rem", md: "2rem" },
-            // Hide scrollbar but keep functionality
-            scrollbarWidth: "none",
-            "&::-webkit-scrollbar": {
-              display: "none",
-            },
-            // For touch devices
-            WebkitOverflowScrolling: "touch",
           }}
         >
           {/* Combined Chart Container with Coin Selection */}
@@ -1026,25 +980,33 @@ const Dashboard: React.FC = () => {
               borderRadius: 2,
               border: `1px solid ${alpha("#ff6b35", 0.2)}`,
               mb: { xs: 3, md: 4 },
-              overflow: "hidden",
               display: "flex",
               flexDirection: "column",
+              height: { xs: "350px", sm: "450px", md: "550px" },
+              overflow: "hidden",
             }}
           >
-            {/* Coin Selection Header */}
+            {/* Coin Selection Header - Redesigned */}
             <Box
               ref={coinScrollRef}
               sx={{
-                p: 2,
+                p: 1.5,
                 borderBottom: `1px solid ${alpha("#ff6b35", 0.1)}`,
                 overflowX: "auto",
                 overflowY: "hidden",
                 scrollBehavior: "smooth",
                 position: "relative",
-                // Hide scrollbar but keep functionality
-                scrollbarWidth: "none",
+                backgroundColor: alpha("#000", 0.5),
+                flexShrink: 0,
+                // Hide scrollbar
                 "&::-webkit-scrollbar": {
-                  display: "none",
+                  height: 0,
+                },
+                "&::-webkit-scrollbar-track": {
+                  background: "transparent",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  background: "transparent",
                 },
                 // Gradient fade indicators
                 "&::before": {
@@ -1053,9 +1015,9 @@ const Dashboard: React.FC = () => {
                   left: 0,
                   top: 0,
                   bottom: 0,
-                  width: "30px",
+                  width: "20px",
                   background:
-                    "linear-gradient(90deg, #0a0a0a 0%, transparent 100%)",
+                    "linear-gradient(90deg, rgba(10, 10, 10, 0.9) 0%, transparent 100%)",
                   zIndex: 2,
                   pointerEvents: "none",
                   opacity: scrollPosition === "start" ? 0 : 1,
@@ -1067,9 +1029,9 @@ const Dashboard: React.FC = () => {
                   right: 0,
                   top: 0,
                   bottom: 0,
-                  width: "30px",
+                  width: "20px",
                   background:
-                    "linear-gradient(270deg, #0a0a0a 0%, transparent 100%)",
+                    "linear-gradient(270deg, rgba(10, 10, 10, 0.9) 0%, transparent 100%)",
                   zIndex: 2,
                   pointerEvents: "none",
                   opacity: scrollPosition === "end" ? 0 : 1,
@@ -1077,25 +1039,88 @@ const Dashboard: React.FC = () => {
                 },
               }}
             >
-              <Box sx={{ display: "inline-flex", gap: 1 }}>
-                <CoinTabs
-                  coins={coinList.length > 0 ? coinList : COINS}
-                  selected={selectedCoin}
-                  onChange={setSelectedCoin}
-                />
+              <Box sx={{ display: "flex", gap: 1 }}>
+                {(coinList.length > 0 ? coinList : COINS).map((coin) => (
+                  <CoinTab
+                    key={coin.symbol}
+                    coin={coin}
+                    selected={selectedCoin === coin.symbol}
+                    onClick={() => setSelectedCoin(coin.symbol)}
+                    disabled={isInitialLoading}
+                  />
+                ))}
               </Box>
             </Box>
 
-            {/* Trading Chart */}
+            {/* Trading Chart - Fixed Positioning */}
             <Box
+              ref={chartContainerRef}
               sx={{
                 flex: 1,
-                height: { xs: "300px", sm: "400px", md: "500px" },
                 position: "relative",
+                backgroundColor: "#000",
+                width: "100%",
+                minHeight: 0, // Important for flexbox
+                display: "flex",
+                flexDirection: "column",
               }}
             >
-              {cryptoPrice.length > 0 ? (
-                <TradingChart candlestickdata={cryptoPrice} tweets={tweets} />
+              {cryptoPrice.length > 0 && !isChartLoading ? (
+                <Fade
+                  in={true}
+                  timeout={300}
+                  style={{ width: "100%", height: "100%", display: "flex" }}
+                >
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: "100%",
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      "& > div": {
+                        width: "100% !important",
+                        height: "100% !important",
+                      },
+                    }}
+                  >
+                    <TradingChart
+                      candlestickdata={cryptoPrice}
+                      tweets={tweets}
+                    />
+                  </Box>
+                </Fade>
+              ) : isChartLoading ? (
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    gap: 2,
+                  }}
+                >
+                  <CircularProgress
+                    sx={{
+                      color: "#ff6b35",
+                      size: { xs: 30, md: 40 },
+                    }}
+                  />
+                  <Typography
+                    sx={{
+                      color: "#888",
+                      fontSize: { xs: "0.9rem", md: "1rem" },
+                      textAlign: "center",
+                      px: 2,
+                    }}
+                  >
+                    Loading {selectedCoin} chart...
+                  </Typography>
+                </Box>
               ) : (
                 <Box
                   sx={{
@@ -1103,6 +1128,7 @@ const Dashboard: React.FC = () => {
                     flexDirection: "column",
                     justifyContent: "center",
                     alignItems: "center",
+                    width: "100%",
                     height: "100%",
                     gap: 2,
                   }}
@@ -1142,7 +1168,7 @@ const Dashboard: React.FC = () => {
               Sentiment Analysis
             </Typography>
 
-            {tweets.length > 0 ? (
+            {tweets.length > 0 && !isChartLoading ? (
               <Box
                 sx={{
                   backgroundColor: "transparent",
@@ -1150,6 +1176,37 @@ const Dashboard: React.FC = () => {
                 }}
               >
                 <TweetTable records={tweets} />
+              </Box>
+            ) : isChartLoading ? (
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  height: { xs: 200, md: 300 },
+                  backgroundColor: "#0a0a0a",
+                  borderRadius: 2,
+                  border: `1px solid ${alpha("#ff6b35", 0.2)}`,
+                  gap: 2,
+                  textAlign: "center",
+                  p: 2,
+                }}
+              >
+                <CircularProgress
+                  sx={{
+                    color: "#ff6b35",
+                    size: { xs: 30, md: 40 },
+                  }}
+                />
+                <Typography
+                  sx={{
+                    color: "#888",
+                    fontSize: { xs: "0.9rem", md: "1rem" },
+                  }}
+                >
+                  Loading sentiment data...
+                </Typography>
               </Box>
             ) : (
               <Box
@@ -1208,11 +1265,6 @@ const Dashboard: React.FC = () => {
               flexShrink: 0,
               overflowY: "auto",
               overflowX: "hidden",
-              // Hide scrollbar but keep functionality
-              scrollbarWidth: "none",
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
             }}
           >
             <RightSidebarContent />
@@ -1223,7 +1275,7 @@ const Dashboard: React.FC = () => {
       {/* Mobile Drawers */}
       <Drawer
         anchor="left"
-        open={leftDrawerOpen}
+        open={leftDrawerOpen && !isInitialLoading}
         onClose={() => setLeftDrawerOpen(false)}
         sx={{
           "& .MuiDrawer-paper": {
@@ -1257,7 +1309,7 @@ const Dashboard: React.FC = () => {
 
       <Drawer
         anchor="right"
-        open={rightDrawerOpen}
+        open={rightDrawerOpen && !isInitialLoading}
         onClose={() => setRightDrawerOpen(false)}
         sx={{
           "& .MuiDrawer-paper": {

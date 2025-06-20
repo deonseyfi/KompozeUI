@@ -107,15 +107,15 @@ const CryptoTickerBar: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) {
-    return (
-      <div className="ticker-bar">
-        <div className="ticker-content">
-          <div className="loading-text">Loading prices...</div>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <div className="ticker-bar">
+  //       <div className="ticker-content">
+  //         <div className="loading-text">Loading prices...</div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   if (error) {
     return (
